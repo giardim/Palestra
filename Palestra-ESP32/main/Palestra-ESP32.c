@@ -5,7 +5,6 @@ Purpose: This program will:
             2) Convert the raw data to useful
                 data points
             3) Send that data to an AWS 
-Todo: 1) Add wifi component
 *******************************************/
 //includes
 #include <stdio.h>
@@ -41,8 +40,12 @@ Todo: 1) Add wifi component
 #define WIFI_FAILURE 1 << 1
 #define TCP_SUCCESS 1 << 0
 #define TCP_FAILURE 1 << 1
-#define SSID "Verizon-SM-J727V-0484"
-#define PASSWORD "ivfe307#"
+#define SSID "remeber to put in your ssid"
+#define PASSWORD "remeber to put in your password"
+
+//constanst for the wifi group
+static EventGroupHandle_t wifiEventLoop;
+static uint8_t cntTries = 0;
 
 //adresses of the MPU6050
 #define I2C_ADDR 0x68
@@ -73,6 +76,7 @@ struct data_t{
 void i2cMasterInit(void *ignore){
     //variables
     const char *TAG = "i2cMasterInit";
+    //accocated 14 addresses for the 14 addresses in the mpu6050, not sure if we will need them all
     uint8_t buffer[14] = {0};
     data_t data = {
         .accel_x = 0.0,
@@ -150,6 +154,10 @@ void i2cMasterInit(void *ignore){
         ESP_ERROR_CHECK(i2c_master_stop(masterCMD));
         ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, masterCMD, (1000/portTICK_PERIOD_MS)));
         i2c_cmd_link_delete(masterCMD);
+
+        //The calculations to convert the raw data to g's comes from;
+        //http://ozzmaker.com/accelerometer-to-g/
+        //Since we are using the +-2G tolerace, we multiply the data by .061 and divide by 100
         data.accel_x = (((buffer[0] << 8) | buffer[1]) * .061) / 100;
         data.accel_y = (((buffer[2] << 8) | buffer[3]) * .061) / 100;
         data.accel_z = (((buffer[4] << 8) | buffer[5]) * .061) / 100;
@@ -165,32 +173,71 @@ void i2cMasterInit(void *ignore){
         //calculate yaw by taking arctan of the square root of y^2 + z^2 and x, the multiply by 180 and divide by pi
         yaw = (atan2(sqrt(data.accel_y * data.accel_y + data.accel_z * data.accel_z), data.accel_x) * 180) / M_PI; 
 
-        ESP_LOGI(TAG, "pitch:\t%f accel_y:\t%f accel_z:\t%f", data.accel_x, data.accel_y, data.accel_z);
+        ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data.accel_x, data.accel_y, data.accel_z);
         
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }
 
+//funtion to handle wifi event
+static void wifiHandler(void *arg, esp_event_base_t eventBase, int32_t eventID, void *eventData){
+    //function variables
+    char *TAG = "WIFIHANDLER";
+    const uint8_t MAXTRIES = 10;
+    //connect to the access point
+    if (eventBase == WIFI_EVENT && eventID == WIFI_EVENT_STA_START){
+        ESP_LOGI(TAG, "***CONNECTING TO ACCESS POINT***\n");
+        esp_wifi_connect();
+    }
+    else if (eventBase == WIFI_EVENT && eventID == WIFI_EVENT_STA_DISCONNECTED){
+        if (cntTries < MAXTRIES){
+            ++cntTries;
+            ESP_LOGI(TAG, "***ATTEMPING TO RECONNECT: ATTEMPT %u OUT OF %u***\n", cntTries, MAXTRIES);
+            esp_wifi_connect();
+        }
+        else{
+            xEventGroupSetBits(wifiEventLoop, WIFI_FAILURE);
+        }
+    }
+}
+
+//function to handle ip event
+static void ipHandler(void *arg, esp_event_base_t eventBase, int32_t eventID, void *eventData){
+    //function variables
+    char *TAG  = "IPHANDLER";
+    ip_event_got_ip_t *event;
+
+    //get IP
+    if (eventBase == IP_EVENT && eventID == IP_EVENT_STA_GOT_IP){
+        event = (ip_event_got_ip_t*) eventData;
+        ESP_LOGI(TAG, "***GOT IP: " IPSTR, IP2STR(&event->ip_info.ip)); 
+        cntTries = 0;
+        xEventGroupSetBits(wifiEventLoop, WIFI_SUCCESS);
+    }
+}
+
+
 //Connect to wifi
 esp_err_t wifi_connect(){
     //method variables
+    char *TAG = "WIFICONNECT";
     uint8_t status = WIFI_FAILURE;
-    wifi_init_congif_t wifiCFG = WIFI_INIT_CONFIG_DEFAULT();
-    static EventGroupHandle_t wifiEventLoop;
+    wifi_init_config_t wifiCFG = WIFI_INIT_CONFIG_DEFAULT();
     esp_event_handler_instance_t wifiEventHandler;
     esp_event_handler_instance_t ipEventHandler;
     wifi_config_t wifiSettings = {
         .sta = {
             .ssid = SSID,
             .password = PASSWORD,
-            .threshold.authmode = WIFI_AUTH_WPA2_P2K,
+            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
             .pmf_cfg = {
                 .capable = true,
                 .required = false
             },
         },
     };
+    EventBits_t wifiBits;
     //initialize wifi driver
     ESP_ERROR_CHECK(esp_netif_init());
 
@@ -211,21 +258,49 @@ esp_err_t wifi_connect(){
                                                         NULL,
                                                         &wifiEventHandler));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                        IP_STA_GOT_IP,
+                                                        IP_EVENT_STA_GOT_IP,
                                                         &ipHandler,
                                                         NULL,
                                                         &ipEventHandler));
 
 
     //set the wifi mode
-    ESP_ERROR_CHECK(esp_wifi_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
     //set wifi config
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifiSettings);
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifiSettings));
 
+    //start driver
+    ESP_ERROR_CHECK(esp_wifi_start());
+    ESP_LOGI(TAG, "***WIFI INITIALIZING***\n");
 
+    //block this event until we get success or failure
+    wifiBits = xEventGroupWaitBits(wifiEventLoop, 
+                                    WIFI_SUCCESS | WIFI_FAILURE,
+                                    pdFALSE,
+                                    pdFALSE,
+                                    portMAX_DELAY);
 
+    //Once we get either success or failure, the proram will stop blocking and this function can check what we got
+    if (wifiBits == WIFI_SUCCESS){
+        ESP_LOGI(TAG, "***SUCCESSFULLY CONNECTED TO ACCESS POINT***\n");
+        status = WIFI_SUCCESS;
+    }
+    else if (wifiBits == WIFI_FAILURE){
+        ESP_LOGE(TAG, "***FAILED TO CONNECT TO ACCESS POINT***\n");
+        status = WIFI_FAILURE;
+    }
+    else{
+        ESP_LOGE(TAG, "***UNEXPECTED EVENT***\n");
+        status = WIFI_FAILURE;
+    }
+    
+    //unregister the events
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, wifiEventHandler));
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, ipEventHandler)); 
+    vEventGroupDelete(wifiEventLoop);
 
+    return status;
 }
 
 void app_main(void){
@@ -241,11 +316,14 @@ void app_main(void){
 
     //connect to the access point
     status = wifi_connect();
-    if (status != ESP_OK){
+    if (status != WIFI_SUCCESS){
         ESP_LOGE(TAG, "***COULD NOT CONNECT TO AP***\n");
         exit(EXIT_FAILURE);
     }
-
+    
+    //if we don't set a delay the esp will crash
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+     
     //create a task to start reading the MPU6050
-    xTaskCreate(i2cMasterInit, "INITMASTER", 1024, NULL, 1, NULL);
+    xTaskCreate(i2cMasterInit, "INITMASTER", 4096, NULL, 1, NULL);
 }
