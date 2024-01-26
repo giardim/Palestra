@@ -1,0 +1,85 @@
+[0;33m--- esp-idf-monitor 1.3.4 on /dev/ttyUSB0 115200 ---[0m
+[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---[0m
+[0;33m0x40080400: _init at ??:?
+[0m
+[0;33m0x40081846: panic_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/panic.c:472
+[0m
+[0;33m0x40085801: esp_system_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/port/esp_system_chip.c:93
+[0m
+[0;33m0x4008b255: __assert_func at /home/michaelg/SUNYPoly/esp-idf/components/newlib/assert.c:81
+[0m
+[0;33m0x40085e7e: xQueueSemaphoreTake at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/queue.c:1713 (discriminator 1)
+[0m
+[0;33m0x4008b014: esp_log_impl_lock_timeout at /home/michaelg/SUNYPoly/esp-idf/components/log/log_freertos.c:48
+[0m
+[0;33m0x400e359e: esp_log_writev at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:207
+[0m
+[0;33m0x4008afcd: esp_log_write at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:225
+[0m
+[0;33m0x400e2e6d: main_task at /home/michaelg/SUNYPoly/esp-idf/components/freertos/app_startup.c:209 (discriminator 1)
+[0m
+[0;33m0x40086065: vPortTaskWrapper at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:134
+[0m
+[0;33m0x40080400: _init at ??:?
+[0m
+[0;33m0x40081846: panic_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/panic.c:472
+[0m
+[0;33m0x40085801: esp_system_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/port/esp_system_chip.c:93
+[0m
+[0;33m0x4008b255: __assert_func at /home/michaelg/SUNYPoly/esp-idf/components/newlib/assert.c:81
+[0m
+[0;33m0x40085e7e: xQueueSemaphoreTake at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/queue.c:1713 (discriminator 1)
+[0m
+[0;33m0x4008b014: esp_log_impl_lock_timeout at /home/michaelg/SUNYPoly/esp-idf/components/log/log_freertos.c:48
+[0m
+[0;33m0x400e359e: esp_log_writev at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:207
+[0m
+[0;33m0x4008afcd: esp_log_write at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:225
+[0m
+[0;33m0x400e2e6d: main_task at /home/michaelg/SUNYPoly/esp-idf/components/freertos/app_startup.c:209 (discriminator 1)
+[0m
+[0;33m0x40086065: vPortTaskWrapper at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:134
+[0m
+[0;33m0x40080400: _init at ??:?
+[0m
+[0;33m0x40081846: panic_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/panic.c:472
+[0m
+[0;33m0x40085801: esp_system_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/port/esp_system_chip.c:93
+[0m
+[0;33m0x4008b255: __assert_func at /home/michaelg/SUNYPoly/esp-idf/components/newlib/assert.c:81
+[0m
+[0;33m0x40085e7e: xQueueSemaphoreTake at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/queue.c:1713 (discriminator 1)
+[0m
+[0;33m0x4008b014: esp_log_impl_lock_timeout at /home/michaelg/SUNYPoly/esp-idf/components/log/log_freertos.c:48
+[0m
+[0;33m0x400e359e: esp_log_writev at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:207
+[0m
+[0;33m0x4008afcd: esp_log_write at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:225
+[0m
+[0;33m0x400e2e6d: main_task at /home/michaelg/SUNYPoly/esp-idf/components/freertos/app_startup.c:209 (discriminator 1)
+[0m
+[0;33m0x40086065: vPortTaskWrapper at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:134
+[0m
+[0;33m0x40080400: _init at ??:?
+[0m
+[0;33m0x40081846: panic_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/panic.c:472
+[0m
+[0;33m0x40085801: esp_system_abort at /home/michaelg/SUNYPoly/esp-idf/components/esp_system/port/esp_system_chip.c:93
+[0m
+[0;33m0x4008b255: __assert_func at /home/michaelg/SUNYPoly/esp-idf/components/newlib/assert.c:81
+[0m
+[0;33m0x40085e7e: xQueueSemaphoreTake at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/queue.c:1713 (discriminator 1)
+[0m
+[0;33m0x4008b014: esp_log_impl_lock_timeout at /home/michaelg/SUNYPoly/esp-idf/components/log/log_freertos.c:48
+[0m
+[0;33m0x400e359e: esp_log_writev at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:207
+[0m
+[0;33m0x4008afcd: esp_log_write at /home/michaelg/SUNYPoly/esp-idf/components/log/log.c:225
+[0m
+[0;33m0x400e2e6d: main_task at /home/michaelg/SUNYPoly/esp-idf/components/freertos/app_startup.c:209 (discriminator 1)
+[0m
+[0;33m0x40086065: vPortTaskWrapper at /home/michaelg/SUNYPoly/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:134
+[0m
+[0;33m0x40080400: _init at ??:?
+[0m
+[0m

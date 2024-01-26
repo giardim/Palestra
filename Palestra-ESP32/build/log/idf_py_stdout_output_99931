@@ -1,0 +1,86 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:7172
+load:0x40078000,len:15556
+load:0x40080400,len:4
+ho 8 tail 4 room 4
+load:0x40080404,len:3904
+entry 0x40080640
+[0;32mI (31) boot: ESP-IDF v5.3-dev-1353-gb3f7e2c8a4 2nd stage bootloader[0m
+[0;32mI (31) boot: compile time Jan 25 2024 10:04:23[0m
+[0;32mI (33) boot: Multicore bootloader[0m
+[0;32mI (37) boot: chip revision: v3.1[0m
+[0;32mI (41) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (45) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (50) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (54) boot: Enabling RNG early entropy source...[0m
+[0;32mI (60) boot: Partition Table:[0m
+[0;32mI (63) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (71) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (78) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (86) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (93) boot: End of partition table[0m
+[0;32mI (97) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0dd60h ( 56672) map[0m
+[0;32mI (125) esp_image: segment 1: paddr=0001dd88 vaddr=3ffb0000 size=02290h (  8848) load[0m
+[0;32mI (129) esp_image: segment 2: paddr=00020020 vaddr=400d0020 size=18f08h (102152) map[0m
+[0;32mI (166) esp_image: segment 3: paddr=00038f30 vaddr=3ffb2290 size=000e0h (   224) load[0m
+[0;32mI (166) esp_image: segment 4: paddr=00039018 vaddr=40080000 size=0e5b4h ( 58804) load[0m
+[0;32mI (202) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (202) boot: Disabling RNG early entropy source...[0m
+[0;32mI (214) cpu_start: Multicore app[0m
+[0;32mI (222) cpu_start: Pro cpu start user code[0m
+[0;32mI (222) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (223) cpu_start: Application information:[0m
+[0;32mI (225) cpu_start: Project name:     Palestra-ESP32[0m
+[0;32mI (231) cpu_start: App version:      1[0m
+[0;32mI (235) cpu_start: Compile time:     Jan 25 2024 10:04:18[0m
+[0;32mI (242) cpu_start: ELF file SHA256:  2c370adc5...[0m
+[0;32mI (247) cpu_start: ESP-IDF:          v5.3-dev-1353-gb3f7e2c8a4[0m
+[0;32mI (253) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (258) cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (263) cpu_start: Chip rev:         v3.1[0m
+[0;32mI (268) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (275) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (281) heap_init: At 3FFB2C88 len 0002D378 (180 KiB): DRAM[0m
+[0;32mI (287) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (294) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (300) heap_init: At 4008E5B4 len 00011A4C (70 KiB): IRAM[0m
+[0;32mI (308) spi_flash: detected chip: generic[0m
+[0;32mI (311) spi_flash: flash io: dio[0m
+[0;33mW (315) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (328) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (339) main_task: Started on CPU0[0m
+[0;32mI (349) main_task: Calling app_main()[0m
+[0;32mI (379) main_task: Returned from app_main()[0m
+[0;32mI (379) i2cMasterInit: accel_x:	-1664 accel_y:	344 accel_z:	15700[0m
+[0;32mI (1379) i2cMasterInit: accel_x:	-1672 accel_y:	408 accel_z:	15700[0m
+[0;32mI (2379) i2cMasterInit: accel_x:	-1588 accel_y:	320 accel_z:	15624[0m
+[0;32mI (3379) i2cMasterInit: accel_x:	-1716 accel_y:	296 accel_z:	15536[0m
+[0;32mI (4379) i2cMasterInit: accel_x:	-10504 accel_y:	-28 accel_z:	11772[0m
+[0;32mI (5379) i2cMasterInit: accel_x:	-11464 accel_y:	-204 accel_z:	10248[0m
+[0;32mI (6379) i2cMasterInit: accel_x:	-4352 accel_y:	236 accel_z:	15716[0m
+[0;32mI (7379) i2cMasterInit: accel_x:	-1856 accel_y:	368 accel_z:	15592[0m
+[0;32mI (8379) i2cMasterInit: accel_x:	96 accel_y:	676 accel_z:	17520[0m
+[0;32mI (9379) i2cMasterInit: accel_x:	9844 accel_y:	316 accel_z:	13040[0m
+[0;32mI (10379) i2cMasterInit: accel_x:	11316 accel_y:	348 accel_z:	11628[0m
+[0;32mI (11379) i2cMasterInit: accel_x:	1444 accel_y:	404 accel_z:	15928[0m
+[0;32mI (12379) i2cMasterInit: accel_x:	-1660 accel_y:	324 accel_z:	15636[0m
+[0;32mI (13379) i2cMasterInit: accel_x:	-12 accel_y:	-7204 accel_z:	14008[0m
+[0;32mI (14379) i2cMasterInit: accel_x:	200 accel_y:	-7948 accel_z:	13772[0m
+[0;32mI (15379) i2cMasterInit: accel_x:	220 accel_y:	-8216 accel_z:	13560[0m
+[0;32mI (16379) i2cMasterInit: accel_x:	-1756 accel_y:	292 accel_z:	15612[0m
+[0;32mI (17379) i2cMasterInit: accel_x:	-1748 accel_y:	264 accel_z:	15620[0m
+[0;32mI (18379) i2cMasterInit: accel_x:	-1640 accel_y:	348 accel_z:	15448[0m
+[0;32mI (19379) i2cMasterInit: accel_x:	-1732 accel_y:	300 accel_z:	15476[0m
+[0;32mI (20379) i2cMasterInit: accel_x:	-1656 accel_y:	276 accel_z:	15604[0m
+[0;32mI (21379) i2cMasterInit: accel_x:	-1716 accel_y:	200 accel_z:	15712[0m
+[0;32mI (22379) i2cMasterInit: accel_x:	-1676 accel_y:	324 accel_z:	15604[0m
+[0;32mI (23379) i2cMasterInit: accel_x:	-1784 accel_y:	260 accel_z:	15560[0m
+[0;32mI (24379) i2cMasterInit: accel_x:	-1564 accel_y:	300 accel_z:	15692[0m
+[0;32mI (25379) i2cMasterInit: accel_x:	-1668 accel_y:	344 accel_z:	15552[0m
+[0;32mI (26379) i2cMasterInit: accel_x:	-1568 accel_y:	288 accel_z:	15604[0m
+[0;32mI (27379) i2cMasterInit: accel_x:	-1796 accel_y:	396 accel_z:	15692[0m
