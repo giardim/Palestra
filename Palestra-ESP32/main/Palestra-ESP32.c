@@ -38,10 +38,8 @@ Purpose: This program will:
 //constants for the wifi status
 #define WIFI_SUCCESS 1 << 0
 #define WIFI_FAILURE 1 << 1
-#define TCP_SUCCESS 1 << 0
-#define TCP_FAILURE 1 << 1
-#define SSID "remeber to put in your ssid"
-#define PASSWORD "remeber to put in your password"
+#define SSID "GIARDIM"
+#define PASSWORD "superSecretPassword"
 
 //constanst for the wifi group
 static EventGroupHandle_t wifiEventLoop;
@@ -219,7 +217,7 @@ static void ipHandler(void *arg, esp_event_base_t eventBase, int32_t eventID, vo
 
 
 //Connect to wifi
-esp_err_t wifi_connect(){
+esp_err_t wifiConnect(){
     //method variables
     char *TAG = "WIFICONNECT";
     uint8_t status = WIFI_FAILURE;
@@ -303,6 +301,7 @@ esp_err_t wifi_connect(){
     return status;
 }
 
+//main
 void app_main(void){
     const char *TAG = "MAIN";
 
@@ -315,12 +314,12 @@ void app_main(void){
     }
 
     //connect to the access point
-    status = wifi_connect();
+    status = wifiConnect();
     if (status != WIFI_SUCCESS){
         ESP_LOGE(TAG, "***COULD NOT CONNECT TO AP***\n");
         exit(EXIT_FAILURE);
     }
-    
+   
     //if we don't set a delay the esp will crash
     vTaskDelay(1000 / portTICK_PERIOD_MS);
      
