@@ -24,7 +24,7 @@ int main (int argc, char *argv[]){
     struct sockaddr_in serverAddr;
     struct sockaddr_in clientAddr;
     socklen_t cliLen;
-
+    
     //the user should enter a port number as a command line argument
     if (argc < 2){
         printf("***PORT NUMBER NOT PROVIDED***\n");
@@ -50,7 +50,8 @@ int main (int argc, char *argv[]){
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(PORT);
-
+     
+    
     //bind the port to the address
     if (bind(sockFD, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
         error("***COULD NOT BIND TO PORT***\n");
@@ -95,7 +96,10 @@ int main (int argc, char *argv[]){
 
         //read input from the server (essentially a safer version of scanf)
         fgets(buffer, sizeof(buffer), stdin);
-
+        if (strcmp(buffer,  "QUIT") == 0){
+            break;
+        }
+        
         //send the data to the client
         n = write(sockFD, buffer, strlen(buffer));
         if (n < 0){
@@ -105,7 +109,7 @@ int main (int argc, char *argv[]){
         if (strcmp("QUIT", buffer) == 0){
             break;
         }
-
+        shutdown(sockFD, 0);
         close(sockFD);
     }
 

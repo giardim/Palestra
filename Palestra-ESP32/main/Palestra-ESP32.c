@@ -4,7 +4,7 @@ Purpose: This program will:
             1) Read in data from an MPU6050 
             2) Convert the raw data to useful
                 data points
-            3) Send that data to an AWS 
+            3) Send that data to a server 
 *******************************************/
 //includes
 #include <stdio.h>
@@ -17,6 +17,7 @@ Purpose: This program will:
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -309,82 +310,45 @@ esp_err_t wifiConnect(){
 }
 
 //connect to tcp server
-int tcpConnect()
-{   //function variables
+int tcpConnect(void){
+    //function variables
+    int sockFD = socket(AF_INET, SOCK_STREAM, 0);
+    int err = 0;
     const int PORT = 8080;
-    int sockFD = 0;
-    int n = 0;
-    struct sockaddr_in serverAddr;
-    struct hostent *server;
-    char buffer[256];
-    char *TAG = "TCPCONNECT";
-    
-    //create the socket 
-    sockFD = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockFD < 0){
-        ESP_LOGE(TAG, "***COULD NOT CREATE SOCKET***\n");
-        return TCP_FAILURE;
-    }   
-    else {
-        ESP_LOGI(TAG, "***SOCKET CREATED***\n");
-    }
-    
-    server = gethostbyname("giardm");
-    if (server == NULL){
-        ESP_LOGE(TAG, "***SERVER IS NOT FOUND***\n");
-        return TCP_FAILURE;
-    }
-    else{
-        ESP_LOGI(TAG, "***GOT SERVER IP***\n");
-    }
-
-    //clear the serverAddress to ensure to data was left
-    memset(&serverAddr, 0, sizeof(serverAddr));
-
-    //configure the connection
-    serverAddr.sin_family = AF_INET;
-   
-   //copy the host address to the s.addr
-    memcpy(&server->h_addr, &serverAddr.sin_addr.s_addr, server->h_length);
-    serverAddr.sin_port = htons(PORT);
-
-    //connect to the socket
-    if (connect(sockFD, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
-        ESP_LOGE(TAG, "***COULD NOT CONNECT TO THE SERVER***\n");
-        return TCP_FAILURE;
-    }
-    else {
-        ESP_LOGI(TAG, "***CONNECTED TO SERVER***\n");
-    }
-    
-    //start communication with the server
+    const char *HOSTNAME = "192.168.51.246";
+    const char *TAG = "TCP CONNECT";
+    struct hostent *host;
+    struct sockaddr_in serverAddress;
     while(true){
-        //get input from the client
-        memset(&buffer, 0, sizeof(buffer));
-        strcpy(buffer, "HELLO WE ARE CONNECTED!!!\n");
-        n = write(sockFD, buffer, strlen(buffer));
-        if (n < 0){
-            ESP_LOGE(TAG, "***COULD NOT WRITE TO SERVER***\n");
+        //create a socket
+        if (sockFD < 0){
+            ESP_LOGE(TAG, "***UNABLE TO CREATE A SOCKET: %d***\n", errno);
             return TCP_FAILURE;
         }
-
-        //clear the buffer again
-        memset(&buffer, 0, sizeof(buffer));
-
-        //read input from the server
-        n = read(sockFD, buffer, sizeof(buffer));
-        if (n < 0){
-            ESP_LOGE(TAG, "***COULD NOT READ DATA FROM SERVER***\n");
+        //setup host parameters
+        host = gethostbyname(HOSTNAME);
+        if (host == NULL){
+            ESP_LOGE(TAG, "***UNABLE TO FIND HOSTNAME***\n");
             return TCP_FAILURE;
         }
-        ESP_LOGI(TAG, "SERVER: %s\n", buffer);
+        
+        //config the host parameter
+        serverAddress.sin_family = AF_INET;
+        serverAddress.sin_port = htons(PORT);
+        serverAddress.sin_addr.s_addr = *(in_addr_t *) host -> h_addr;
 
-        if (strcmp("QUIT", buffer) == 0){
-            break;
+        //connect to the server
+        err = connect(sockFD, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
+        if (err != 0){
+            ESP_LOGE(TAG, "***UNABLE TO CONNECT TO SERVER: %d***\n", errno);
+            return TCP_FAILURE;
         }
-      
+        else{
+            ESP_LOGI(TAG, "***CONNECTED TO THE SERVER***\n");
+        }
+
     }
-
+    shutdown(sockFD, 0);
     close(sockFD);
     return TCP_SUCCESS;
 }
