@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdbool.h>
+#include <limits.h>
 
 //write an error function
 void error (const char *msg){
@@ -57,8 +58,14 @@ int main (int argc, char *argv[]){
     else{
         printf("***PORT BINDED***\n");
     }
-    
+  
+    char hostname[HOST_NAME_MAX + 1];
+    hostname[1023] = 0;
+    gethostname(hostname, sizeof(hostname));
+    printf("***HOSTNAME %s ***\n", hostname);
+ 
     //listen for incoming connections
+    printf("***LISTENING...***\n");
     listen(sockFD, MAX_CONNECTIONS);
     cliLen = sizeof(clientAddr);
     
@@ -70,7 +77,8 @@ int main (int argc, char *argv[]){
     else{
         printf("***SOCKET ACCEPTED***\n");
     }
-
+   
+   
     while(true){
         //clear the buffer to ensure there is no data left over
         memset(&buffer, 0, sizeof(buffer));

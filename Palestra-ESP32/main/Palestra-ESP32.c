@@ -9,9 +9,14 @@ Purpose: This program will:
 //includes
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -38,6 +43,8 @@ Purpose: This program will:
 //constants for the wifi status
 #define WIFI_SUCCESS 1 << 0
 #define WIFI_FAILURE 1 << 1
+#define TCP_SUCCESS 1 << 0
+#define TCP_FAILURE 1 << 1
 #define SSID "GIARDIM"
 #define PASSWORD "superSecretPassword"
 
@@ -301,6 +308,87 @@ esp_err_t wifiConnect(){
     return status;
 }
 
+//connect to tcp server
+int tcpConnect()
+{   //function variables
+    const int PORT = 8080;
+    int sockFD = 0;
+    int n = 0;
+    struct sockaddr_in serverAddr;
+    struct hostent *server;
+    char buffer[256];
+    char *TAG = "TCPCONNECT";
+    
+    //create the socket 
+    sockFD = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockFD < 0){
+        ESP_LOGE(TAG, "***COULD NOT CREATE SOCKET***\n");
+        return TCP_FAILURE;
+    }   
+    else {
+        ESP_LOGI(TAG, "***SOCKET CREATED***\n");
+    }
+    
+    server = gethostbyname("giardm");
+    if (server == NULL){
+        ESP_LOGE(TAG, "***SERVER IS NOT FOUND***\n");
+        return TCP_FAILURE;
+    }
+    else{
+        ESP_LOGI(TAG, "***GOT SERVER IP***\n");
+    }
+
+    //clear the serverAddress to ensure to data was left
+    memset(&serverAddr, 0, sizeof(serverAddr));
+
+    //configure the connection
+    serverAddr.sin_family = AF_INET;
+   
+   //copy the host address to the s.addr
+    memcpy(&server->h_addr, &serverAddr.sin_addr.s_addr, server->h_length);
+    serverAddr.sin_port = htons(PORT);
+
+    //connect to the socket
+    if (connect(sockFD, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
+        ESP_LOGE(TAG, "***COULD NOT CONNECT TO THE SERVER***\n");
+        return TCP_FAILURE;
+    }
+    else {
+        ESP_LOGI(TAG, "***CONNECTED TO SERVER***\n");
+    }
+    
+    //start communication with the server
+    while(true){
+        //get input from the client
+        memset(&buffer, 0, sizeof(buffer));
+        strcpy(buffer, "HELLO WE ARE CONNECTED!!!\n");
+        n = write(sockFD, buffer, strlen(buffer));
+        if (n < 0){
+            ESP_LOGE(TAG, "***COULD NOT WRITE TO SERVER***\n");
+            return TCP_FAILURE;
+        }
+
+        //clear the buffer again
+        memset(&buffer, 0, sizeof(buffer));
+
+        //read input from the server
+        n = read(sockFD, buffer, sizeof(buffer));
+        if (n < 0){
+            ESP_LOGE(TAG, "***COULD NOT READ DATA FROM SERVER***\n");
+            return TCP_FAILURE;
+        }
+        ESP_LOGI(TAG, "SERVER: %s\n", buffer);
+
+        if (strcmp("QUIT", buffer) == 0){
+            break;
+        }
+      
+    }
+
+    close(sockFD);
+    return TCP_SUCCESS;
+}
+
 //main
 void app_main(void){
     const char *TAG = "MAIN";
@@ -319,7 +407,12 @@ void app_main(void){
         ESP_LOGE(TAG, "***COULD NOT CONNECT TO AP***\n");
         exit(EXIT_FAILURE);
     }
-   
+    
+    status = tcpConnect();
+    if (status != TCP_SUCCESS){
+        ESP_LOGI(TAG, "***IT DIDNT WORK***\n");
+    }
+
     //if we don't set a delay the esp will crash
     vTaskDelay(1000 / portTICK_PERIOD_MS);
      
