@@ -314,39 +314,70 @@ int tcpConnect(void){
     //function variables
     int sockFD = socket(AF_INET, SOCK_STREAM, 0);
     int err = 0;
+    int n = 0;
     const int PORT = 8080;
     const char *HOSTNAME = "192.168.51.246";
-    const char *TAG = "TCP CONNECT";
+    const char *TAG = "TCPCONNECT";
+    char buffer[256] = ""; 
     struct hostent *host;
     struct sockaddr_in serverAddress;
+    //create a socket
+    if (sockFD < 0){
+        ESP_LOGE(TAG, "***UNABLE TO CREATE A SOCKET: %d***\n", errno);
+        return TCP_FAILURE;
+    }
+    //setup host parameters
+    host = gethostbyname(HOSTNAME);
+    if (host == NULL){
+       ESP_LOGE(TAG, "***UNABLE TO FIND HOSTNAME***\n");
+       return TCP_FAILURE;
+    }
+       
+    //config the host parameter
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(PORT);
+    serverAddress.sin_addr.s_addr = *(in_addr_t *) host -> h_addr;
+
+    //connect to the server
+    err = connect(sockFD, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
+    if (err != 0){
+    ESP_LOGE(TAG, "***UNABLE TO CONNECT TO SERVER: %d***\n", errno);
+        perror("***UNABLE TO CONNECT TO SERVER***\n");
+        return TCP_FAILURE;
+    }
+    else{
+        ESP_LOGI(TAG, "***CONNECTED TO THE SERVER***\n");
+    }
+
+    //tell the server you want to talk
+    strcpy(buffer, "OK");
+    n = write(sockFD, buffer, sizeof(buffer));
+    if (n < 0){
+        ESP_LOGE(TAG, "***FAILED TO WRITE TO SERVER\n***");
+        return TCP_FAILURE;
+    }
     while(true){
-        //create a socket
-        if (sockFD < 0){
-            ESP_LOGE(TAG, "***UNABLE TO CREATE A SOCKET: %d***\n", errno);
+        //clear the buffer to ensure there is no data left over
+        memset(&buffer, 0, sizeof(buffer));
+
+        //get response from server
+        n = read(sockFD, buffer, sizeof(buffer));
+        if (n < 0){
+            ESP_LOGE(TAG, "***COULD NOT READ FROM SERVER\n***");
             return TCP_FAILURE;
         }
-        //setup host parameters
-        host = gethostbyname(HOSTNAME);
-        if (host == NULL){
-            ESP_LOGE(TAG, "***UNABLE TO FIND HOSTNAME***\n");
-            return TCP_FAILURE;
-        }
+        ESP_LOGI(TAG, "***SERVER: %s\n***", buffer);
         
-        //config the host parameter
-        serverAddress.sin_family = AF_INET;
-        serverAddress.sin_port = htons(PORT);
-        serverAddress.sin_addr.s_addr = *(in_addr_t *) host -> h_addr;
-
-        //connect to the server
-        err = connect(sockFD, (struct sockaddr *) &serverAddress, sizeof(serverAddress));
-        if (err != 0){
-            ESP_LOGE(TAG, "***UNABLE TO CONNECT TO SERVER: %d***\n", errno);
-            return TCP_FAILURE;
+        if (strcmp("QUIT", buffer) == 0){
+            memset(buffer, 0, sizeof(buffer));
+            strcpy("CONFIRMED", buffer);
+            n = write(sockFD, buffer, sizeof(buffer));
         }
-        else{
-            ESP_LOGI(TAG, "***CONNECTED TO THE SERVER***\n");
+        else { 
+            memset(buffer, 0, sizeof(buffer));
+            strcpy("NOT CONFIRMED", buffer);
+            n = write(sockFD, buffer, sizeof(buffer));
         }
-
     }
     shutdown(sockFD, 0);
     close(sockFD);

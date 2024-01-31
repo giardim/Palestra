@@ -90,15 +90,16 @@ int main (int argc, char *argv[]){
             error("***COULD NOT READ FROM THE CLIENT***\n");
         }
         printf("CLIENT: %s\n", buffer);
+        
+         if (strcmp("QUIT", buffer) == 0){
+            break;
+        }
 
         //clear the buffer again
         memset(&buffer, 0, sizeof(buffer));
 
         //read input from the server (essentially a safer version of scanf)
         fgets(buffer, sizeof(buffer), stdin);
-        if (strcmp(buffer,  "QUIT") == 0){
-            break;
-        }
         
         //send the data to the client
         n = write(sockFD, buffer, strlen(buffer));
@@ -109,9 +110,8 @@ int main (int argc, char *argv[]){
         if (strcmp("QUIT", buffer) == 0){
             break;
         }
-        shutdown(sockFD, 0);
-        close(sockFD);
     }
-
+    shutdown(sockFD, 0);
+    close(sockFD);
     exit(EXIT_SUCCESS);
 }
