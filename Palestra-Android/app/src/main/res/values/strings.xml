@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Palestra</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="profilePictureDesc">Button will bring up image selector</string>
     <string name="profileAboutMe">About me&#8230;</string>
+    <string name="benchDesc">Click here to track bench press information</string>
+    <string name="squatDesc">Click here to track squat information</string>
+    <string name="deadDesc">Click here to track dead lift information</string>
+    <string name="searchFriends">Search...</string>
 </resources>
