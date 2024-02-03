@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#121214">
+    android:background="#272928">
 
     <ImageButton
         android:id="@+id/benchPressIcon"
@@ -14,11 +14,11 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/squatPressIcon"
+        app:layout_constraintRight_toLeftOf="@id/squatIcon"
         android:contentDescription="@string/benchDesc"/>
 
     <ImageButton
-        android:id="@+id/squatPressIcon"
+        android:id="@+id/squatIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/circle_picture_button"
@@ -26,11 +26,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/benchPressIcon"
-        app:layout_constraintRight_toLeftOf="@id/deadliftPressIcon"
+        app:layout_constraintRight_toLeftOf="@id/deadliftIcon"
         android:contentDescription="@string/squatDesc"/>
 
     <ImageButton
-        android:id="@+id/deadliftPressIcon"
+        android:id="@+id/deadliftIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/circle_picture_button"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/squatPressIcon"
+        app:layout_constraintLeft_toRightOf="@id/squatIcon"
         android:contentDescription="@string/deadDesc"/>
 
 

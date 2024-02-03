@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121214"
+    android:background="#272928"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <ImageButton
         android:id="@+id/profilePictureButton"
@@ -25,7 +25,7 @@
         android:layout_height="200dp"
         android:hint="@string/profileAboutMe"
         android:textColor="@color/white"
-        android:text="HELLO"
+        android:text="@string/aboutMe"
         android:gravity="center"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"

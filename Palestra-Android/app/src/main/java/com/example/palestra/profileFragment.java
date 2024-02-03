@@ -1,12 +1,23 @@
 package com.example.palestra;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -58,7 +69,65 @@ public class profileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        final String TAG = "onCreateView";
+        View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
+        ImageButton benchPressButton = rootView.findViewById(R.id.benchPressIcon);
+        ImageButton squatButton = rootView.findViewById(R.id.squatIcon);
+        ImageButton deadliftButton = rootView.findViewById(R.id.deadliftIcon);
+        ImageButton profilePicture = rootView.findViewById(R.id.profilePictureButton);
+        ActivityResultLauncher<Intent> pickMedia = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult o) {
+                        try{
+                            Uri imageUri = o.getData().getData();
+                            profilePicture.setImageURI(imageUri);
+
+                        }
+                        catch(Exception e){
+                            Log.w(TAG, "Could not set image: " + e);
+                        }
+                    }
+                });
+
+
+        benchPressButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Benchpress");
+            }
+        });
+
+        squatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "SQUAT");
+            }
+        });
+
+        deadliftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "DEADLIFT");
+            }
+        });
+
+        profilePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "clicked profile picture");
+                selectImage(pickMedia);
+            }
+        });
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        return rootView;
+    }
+
+    private void selectImage(ActivityResultLauncher<Intent> pickMedia){
+        final String TAG = "selectImage";
+        Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
+        pickMedia.launch(intent);
     }
 }
