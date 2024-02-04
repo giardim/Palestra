@@ -39,6 +39,4 @@
         app:menu="@menu/nav_bar_menu"/>
 
 
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

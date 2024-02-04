@@ -7,4 +7,8 @@
     <string name="deadDesc">Click here to track dead lift information</string>
     <string name="searchFriends">Search&#8230;</string>
     <string name="aboutMe">About me&#8230;</string>
+    <string name="Return">Return</string>
+    <string name="trackWorkout">Track Workout&#8230;</string>
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
