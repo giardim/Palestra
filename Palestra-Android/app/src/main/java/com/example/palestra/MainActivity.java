@@ -11,19 +11,23 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import com.example.palestra.TCPClient;
 
 import com.example.palestra.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private ActivityMainBinding binding;
+    private boolean serverStatus;
+    private final TCPClient tcpClient = new TCPClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ActivityMainBinding binding;
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         replaceFragment(new profileFragment(this));
+        tcpClient.start();
 
         binding.navBar.setOnItemSelectedListener(item -> {
             if (item.getItemId() == (R.id.profileIcon)){
