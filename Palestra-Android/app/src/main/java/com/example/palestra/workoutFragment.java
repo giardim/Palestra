@@ -1,5 +1,6 @@
 package com.example.palestra;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -15,13 +16,21 @@ import android.widget.TextView;
 import com.example.palestra.MainActivity;
 
 public class workoutFragment extends Fragment {
-    private String currWorkout = "You forgot to pass a string fuckass";
-    private MainActivity mainActivity = new MainActivity();
+    private String currWorkout = "";
+    private MainActivity mainActivity;
+    private TCPClient tcpClient;
+    private String serverMessage;
+    private boolean isTracking = false;
 
     public workoutFragment() {
         // Required empty public constructor
     }
 
+    public workoutFragment(String currWorkout, MainActivity mainActivity, TCPClient tcpClient){
+        this.currWorkout = currWorkout;
+        this.mainActivity = mainActivity;
+        this.tcpClient = tcpClient;
+    }
     public workoutFragment(String currWorkout, MainActivity mainActivity){
         this.currWorkout = currWorkout;
         this.mainActivity = mainActivity;
@@ -42,11 +51,31 @@ public class workoutFragment extends Fragment {
         TextView workout = (TextView) root.findViewById(R.id.title);
         workout.setText(currWorkout);
 
+
+        trackStats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isTracking){
+                    isTracking = false;
+                    tcpClient.interrupt();
+                    trackStats.setText("Track Workout...");
+                    trackStats.setBackgroundColor(Color.parseColor("#00ff00"));
+                }
+                else{
+                    isTracking = true;
+                    tcpClient = new TCPClient();
+                    tcpClient.start();
+                    trackStats.setText("Tracking...");
+                    trackStats.setBackgroundColor(Color.parseColor("#ff0000"));
+                }
+            }
+        });
+
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try{
-                    mainActivity.replaceFragment(new profileFragment(mainActivity));
+                    mainActivity.replaceFragment(new profileFragment(mainActivity, tcpClient));
                 }
                 catch (Exception e){
                     Log.d(TAG, "***" + mainActivity + " " + e + "***");
@@ -54,9 +83,11 @@ public class workoutFragment extends Fragment {
 
             }
         });
-
         return root;
     }
 
+    public boolean getIsTracking(){
+        return isTracking;
+    }
 
 }

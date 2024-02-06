@@ -26,17 +26,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        replaceFragment(new profileFragment(this));
-        tcpClient.start();
+        replaceFragment(new profileFragment(this, tcpClient));
 
         binding.navBar.setOnItemSelectedListener(item -> {
             if (item.getItemId() == (R.id.profileIcon)){
-                replaceFragment(new profileFragment(this));
+                replaceFragment(new profileFragment(this, tcpClient));
             }
             else if (item.getItemId() == (R.id.addFriendIcon)){
                 replaceFragment(new searchFragment());
             }
-
             return true;
         });
 
@@ -48,6 +46,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.homeFragment, fragment);
         ft.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override

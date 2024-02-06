@@ -33,7 +33,7 @@ Purpose: This program will:
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
 #include "lwip/err.h"
-
+#include <limits.h>
 //constants for the MPU6050
 #define SDA 21
 #define SCL 22
@@ -79,16 +79,11 @@ struct data_t{
 }typedef data_t;
 
 //Reading values from the MPU6050 via I2C
-void i2cMasterInit(void *ignore){
+void i2cMasterInit(data_t *data){
     //variables
     const char *TAG = "i2cMasterInit";
     //accocated 14 addresses for the 14 addresses in the mpu6050, not sure if we will need them all
-    uint8_t buffer[14] = {0};
-    data_t data = {
-        .accel_x = 0.0,
-        .accel_y = 0.0,
-        .accel_z = 0.0
-    };
+    uint8_t buffer[14] = {0}; 
     uint8_t pitch = 0;
     uint8_t roll = 0;
     uint8_t yaw = 0;
@@ -133,7 +128,6 @@ void i2cMasterInit(void *ignore){
     //delete the command link
     i2c_cmd_link_delete(masterCMD);
     
-    while(true){
         //position the internal register pointer to the x output
         masterCMD = i2c_cmd_link_create();
         ESP_ERROR_CHECK(i2c_master_start(masterCMD));       
@@ -164,26 +158,25 @@ void i2cMasterInit(void *ignore){
         //The calculations to convert the raw data to g's comes from;
         //http://ozzmaker.com/accelerometer-to-g/
         //Since we are using the +-2G tolerace, we multiply the data by .061 and divide by 100
-        data.accel_x = (((buffer[0] << 8) | buffer[1]) * .061) / 100;
-        data.accel_y = (((buffer[2] << 8) | buffer[3]) * .061) / 100;
-        data.accel_z = (((buffer[4] << 8) | buffer[5]) * .061) / 100;
+        data -> accel_x = (((buffer[0] << 8) | buffer[1]) * .061) / 100;
+        data -> accel_y = (((buffer[2] << 8) | buffer[3]) * .061) / 100;
+        data -> accel_z = (((buffer[4] << 8) | buffer[5]) * .061) / 100;
         
         //The calculations below are found on the arduino forms:
         //https://forum.arduino.cc/t/converting-raw-data-from-mpu-6050-to-yaw-pitch-and-roll/465354/18
         //calculate pitch by taking the arctan of z and x, multiply by 180 and divide by pi
-        pitch = (atan2(data.accel_z, data.accel_x) * 180) / M_PI;
+        pitch = (atan2(data->accel_z, data->accel_x) * 180) / M_PI;
         
         //calculate roll by taking the arctan of z and y, multiply by 180 and divide by pi
-        roll = (atan2(data.accel_z, data.accel_y) * 180) / M_PI;
+        roll = (atan2(data->accel_z, data->accel_y) * 180) / M_PI;
 
         //calculate yaw by taking arctan of the square root of y^2 + z^2 and x, the multiply by 180 and divide by pi
-        yaw = (atan2(sqrt(data.accel_y * data.accel_y + data.accel_z * data.accel_z), data.accel_x) * 180) / M_PI; 
+        yaw = (atan2(sqrt(data->accel_y * data->accel_y + data->accel_z * data->accel_z), data->accel_x) * 180) / M_PI; 
 
-        ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data.accel_x, data.accel_y, data.accel_z);
+        ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data->accel_x, data->accel_y, data->accel_z);
         
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-    vTaskDelete(NULL);
+        vTaskDelay(100/portTICK_PERIOD_MS);
+		return;    
 }
 
 //funtion to handle wifi event
@@ -309,6 +302,106 @@ esp_err_t wifiConnect(){
     return status;
 }
 
+
+int tcpConnect (){
+    //function variables
+    const char *TAG = "TCPCONNECT";
+	int sockFD = 0;
+    const int PORT = 8080;
+    const int MAX_CONNECTIONS = 10;
+    int n = 0;
+    char buffer[255] = {' '};
+    struct sockaddr_in serverAddr;
+    struct sockaddr_in clientAddr;
+    socklen_t cliLen;
+	data_t data = {
+        .accel_x = 0.0,
+        .accel_y = 0.0,
+        .accel_z = 0.0
+    };
+
+    //create the socket
+    sockFD = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockFD < 0){
+        ESP_LOGE(TAG, "***COULD NOT OPEN SOCKET***\n");
+    }
+    else{
+        ESP_LOGI(TAG, "***SOCKET OPENED***\n");
+    }
+    
+    //clear the server address
+    memset(&serverAddr, 0, sizeof(serverAddr));
+
+    //configure the socket
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(PORT);
+     
+    
+    //bind the port to the address
+    if (bind(sockFD, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
+        ESP_LOGE(TAG, "***COULD NOT BIND TO PORT***\n");
+    }
+    else{
+        ESP_LOGI(TAG, "***PORT BINDED***\n");
+    }
+  
+    //listen for incoming connections
+    ESP_LOGI(TAG, "***LISTENING...***\n");
+    listen(sockFD, MAX_CONNECTIONS);
+    cliLen = sizeof(clientAddr);
+    
+    //accept the connections
+    sockFD = accept(sockFD, (struct sockaddr *) &clientAddr, &cliLen);
+    if (sockFD < 0){
+        ESP_LOGE(TAG, "***COULD NOT ACCEPT THE SOCKET***\n");
+    }
+    else{
+        printf("***SOCKET ACCEPTED***\n");
+    }
+   
+   
+    while(true){
+        //clear the buffer to ensure there is no data left over
+        memset(&buffer, 0, sizeof(buffer));
+
+        //read data from the client
+        n = read(sockFD, buffer, sizeof(buffer));
+        if (n < 0){
+            ESP_LOGE(TAG, "***COULD NOT READ FROM THE CLIENT***\n");
+        }
+        ESP_LOGI(TAG, "CLIENT: %s\n", buffer);
+        
+        if (strcmp("QUIT", buffer) == 0){
+            break;
+        }
+
+		if (strcmp("START", buffer)){	
+    		i2cMasterInit(&data);
+		}
+		else{
+			printf("NOT START: %s", buffer);
+		}
+
+        //clear the buffer again
+        memset(&buffer, 0, sizeof(buffer));
+	
+		//copy the data from the i2cMasterInit to the buffer
+		strcpy(buffer, "okay");	
+
+        //send the data to the client
+       	ESP_LOGI(TAG, "***TRYING TO WRITE***\n");
+	   	n = write(sockFD, buffer, strlen(buffer));	
+       	ESP_LOGI(TAG, "***N: %d***\n", n);
+		if (n < 0){
+            ESP_LOGE(TAG, "***COULD NOT WRITE TO THE CLIENT***\n");
+        }
+    }
+    shutdown(sockFD, 0);
+    close(sockFD);
+    exit(EXIT_SUCCESS);
+}
+/*
 //connect to tcp server
 int tcpConnect(void){
     //function variables
@@ -383,11 +476,11 @@ int tcpConnect(void){
     close(sockFD);
     return TCP_SUCCESS;
 }
-
+*/
 //main
 void app_main(void){
     const char *TAG = "MAIN";
-
+	
     //flash the nvs
     esp_err_t status = nvs_flash_init();
     if (status != ESP_OK){
@@ -402,7 +495,7 @@ void app_main(void){
         ESP_LOGE(TAG, "***COULD NOT CONNECT TO AP***\n");
         exit(EXIT_FAILURE);
     }
-    
+
     status = tcpConnect();
     if (status != TCP_SUCCESS){
         ESP_LOGI(TAG, "***IT DIDNT WORK***\n");
@@ -410,7 +503,4 @@ void app_main(void){
 
     //if we don't set a delay the esp will crash
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-     
-    //create a task to start reading the MPU6050
-    xTaskCreate(i2cMasterInit, "INITMASTER", 4096, NULL, 1, NULL);
 }

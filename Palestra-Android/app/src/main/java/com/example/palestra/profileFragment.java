@@ -31,13 +31,15 @@ public class profileFragment extends Fragment {
     private ActivityResultLauncher<Intent> imagePickLauncher;
     private Uri selectedImageUri;
     private MainActivity mainActivity;
+    private TCPClient tcpClient;
 
     public profileFragment() {
         // Required empty public constructor
     }
 
-    public profileFragment(MainActivity mainActivity) {
+    public profileFragment(MainActivity mainActivity, TCPClient tcpClient) {
         this.mainActivity = mainActivity;
+        this.tcpClient = tcpClient;
     }
 
     String getWorkoutName(String workoutName){
@@ -73,7 +75,7 @@ public class profileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try{
-                    mainActivity.replaceFragment(new workoutFragment("Benchpress", mainActivity));
+                    mainActivity.replaceFragment(new workoutFragment("Benchpress", mainActivity, tcpClient));
                 }
                 catch (Exception e){
                     Log.d(TAG, "***" + mainActivity + " " + e + "***");
@@ -85,7 +87,7 @@ public class profileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try{
-                    mainActivity.replaceFragment(new workoutFragment("Squat", mainActivity));
+                    mainActivity.replaceFragment(new workoutFragment("Squat", mainActivity, tcpClient));
                 }
                 catch (Exception e){
                     Log.d(TAG, "***" + mainActivity + " " + e + "***");
@@ -97,7 +99,7 @@ public class profileFragment extends Fragment {
             @Override
             public void onClick(View v){
 
-                    mainActivity.replaceFragment(new workoutFragment("Deadlift", mainActivity));
+                    mainActivity.replaceFragment(new workoutFragment("Deadlift", mainActivity, tcpClient));
 
 
             }
