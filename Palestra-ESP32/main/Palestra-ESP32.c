@@ -82,7 +82,8 @@ struct data_t{
 void i2cMasterInit(data_t *data){
     //variables
     const char *TAG = "i2cMasterInit";
-    //accocated 14 addresses for the 14 addresses in the mpu6050, not sure if we will need them all
+	static bool isInstalled = false;
+	//accocated 14 addresses for the 14 addresses in the mpu6050, not sure if we will need them all
     uint8_t buffer[14] = {0}; 
     uint8_t pitch = 0;
     uint8_t roll = 0;
@@ -101,9 +102,11 @@ void i2cMasterInit(data_t *data){
     //set the configuration
     ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &masterCfg));
     
-    //install the driver
-    ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
-    
+	if (!isInstalled){
+    	//install the driver
+    	ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
+    	isInstalled = true;
+	}
     //initialize the i2c master 
     i2c_cmd_handle_t masterCMD = i2c_cmd_link_create();
     
@@ -387,10 +390,10 @@ int tcpConnect (){
         memset(&buffer, 0, sizeof(buffer));
 	
 		//copy the data from the i2cMasterInit to the buffer
-		strcpy(buffer, "okay");	
+		strcpy(buffer, "okay\n");	
 
         //send the data to the client
-       	ESP_LOGI(TAG, "***TRYING TO WRITE***\n");
+       	ESP_LOGI(TAG, "***TRYING TO WRITE***\r\n");
 	   	n = write(sockFD, buffer, strlen(buffer));	
        	ESP_LOGI(TAG, "***N: %d***\n", n);
 		if (n < 0){
