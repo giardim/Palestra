@@ -4,8 +4,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,14 +13,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.palestra.MainActivity;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.util.ArrayList;
 
 public class workoutFragment extends Fragment {
     private String currWorkout = "";
     private MainActivity mainActivity;
     private TCPClient tcpClient;
-    private String serverMessage;
-    private boolean isTracking = false;
+    private volatile boolean isTracking = false;
+    private ArrayList<String> workoutStats = new ArrayList<String>();
+
+    private TextView workout;
 
     public workoutFragment() {
         // Required empty public constructor
@@ -30,10 +36,6 @@ public class workoutFragment extends Fragment {
         this.currWorkout = currWorkout;
         this.mainActivity = mainActivity;
         this.tcpClient = tcpClient;
-    }
-    public workoutFragment(String currWorkout, MainActivity mainActivity){
-        this.currWorkout = currWorkout;
-        this.mainActivity = mainActivity;
     }
 
     @Override
@@ -48,25 +50,33 @@ public class workoutFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_workout, container, false);
         Button returnButton = (Button) root.findViewById(R.id.returnToMain);
         Button trackStats = (Button) root.findViewById(R.id.trackWorkout);
-        TextView workout = (TextView) root.findViewById(R.id.title);
+        workout = (TextView) root.findViewById(R.id.title);
+        GraphView workoutGraph = (GraphView) root.findViewById(R.id.workoutStats);
         workout.setText(currWorkout);
 
+        //configure graph
+        workoutGraph.getViewport().setScrollable(true);
+        workoutGraph.getViewport().setScalable(true);
+        workoutGraph.getViewport().setScalableY(true);
+        workoutGraph.getViewport().setScrollableY(true);
 
         trackStats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isTracking){
                     isTracking = false;
-                    tcpClient.interrupt();
+                    tcpClient.setStatus(false);
                     trackStats.setText("Track Workout...");
                     trackStats.setBackgroundColor(Color.parseColor("#00ff00"));
+                    workoutStats = tcpClient.getWorkoutStats();
+                    updateGraph(workoutGraph);
                 }
                 else{
                     isTracking = true;
-                    tcpClient = new TCPClient();
-                    tcpClient.start();
+                    tcpClient.setStatus(true);
                     trackStats.setText("Tracking...");
                     trackStats.setBackgroundColor(Color.parseColor("#ff0000"));
+                    workoutGraph.removeAllSeries();
                 }
             }
         });
@@ -86,8 +96,14 @@ public class workoutFragment extends Fragment {
         return root;
     }
 
-    public boolean getIsTracking(){
-        return isTracking;
-    }
+    void updateGraph(GraphView workoutGraph){
+        workoutStats = tcpClient.getWorkoutStats();
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[]{});
 
+        for (int i = 0; i < workoutStats.size(); ++i){
+            Log.d("STAT ARRAY", workoutStats.get(i));
+            series.appendData(new DataPoint(i, Double.parseDouble(workoutStats.get(i))), true, 1000);
+        }
+        workoutGraph.addSeries(series);
+    }
 }

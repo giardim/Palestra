@@ -1,29 +1,24 @@
 package com.example.palestra;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetAddress;
+import java.lang.reflect.Array;
 import java.net.Socket;
-import com.example.palestra.workoutFragment;
+import java.util.ArrayList;
 
-import android.nfc.Tag;
 import android.util.Log;
 
 public class TCPClient extends Thread{
-    private PrintWriter bufferSend;
+
     final static String HOSTNAME = "192.168.131.254";
     final static int PORT = 8080;
-    private boolean status;
+    final static String TAG = "TCPClient";
     private Socket sockFD;
     private String serverMessage;
-    private final workoutFragment wf = new workoutFragment();
-    private boolean read = false;
-    private StringBuilder sb;
+    private boolean status;
+    private ArrayList<String> workoutNumbers = new ArrayList<String>();
 
-    final static String TAG = "TCPClient";
     public TCPClient(){
         //do nothing
     }
@@ -31,15 +26,23 @@ public class TCPClient extends Thread{
     @Override
     public void run(){
         try{
-
             this.sockFD = new Socket(HOSTNAME, PORT);
-            this.status = true;
+            InputStreamReader in = new InputStreamReader(sockFD.getInputStream());
+            BufferedReader bf = new BufferedReader(in);
+            Log.d(TAG, "STATUS: " + status);
             while(true) {
-                sendMessage("START");
-                serverMessage = getMessage();
+                if (status){
+                    sendMessage("START");
+                    serverMessage = getMessage(bf);
+                    workoutNumbers.add(serverMessage);
+                }
+                else{
+                    workoutNumbers.clear();
+                    sendMessage("QUIT");
+                    serverMessage = getMessage(bf);
+                }
                 Log.d(TAG, "SERVER: " + serverMessage);
             }
-
         }
         catch(Exception e){
             Log.d(TAG, "***COULD NOT CONNECT TO HOST " + e + "***");
@@ -47,7 +50,9 @@ public class TCPClient extends Thread{
         }
     }
 
-
+    void setStatus(boolean status){
+        this.status = status;
+    }
 
     public void sendMessage(String message){
         try {
@@ -60,18 +65,19 @@ public class TCPClient extends Thread{
         }
     }
 
-    public String getMessage(){
-        String serverMessage = "DEFAULT";
-        try{
-            InputStreamReader in = new InputStreamReader(sockFD.getInputStream());
-            BufferedReader bf = new BufferedReader(in);
+    public String getMessage(BufferedReader bf) {
+        serverMessage = "DEFAULT";
+        try {
             serverMessage = bf.readLine();
             Log.d("GETMESSAGE", "SERVER:" + serverMessage);
-        }
-        catch (Exception e){
-            Log.d(TAG, "***COULD NOT READ MESSAGE FROM HOST " + e +"***");
+        } catch (Exception e) {
+            Log.d(TAG, "***COULD NOT READ MESSAGE FROM HOST " + e + "***");
         }
         return serverMessage;
+    }
+
+    public ArrayList<String> getWorkoutStats(){
+        return workoutNumbers;
     }
 
     public void shutdownSocket(){
@@ -82,9 +88,5 @@ public class TCPClient extends Thread{
             Log.d(TAG, "***COULD NOT CLOSE SOCKET " + e + " ***");
         }
 
-    }
-
-    public boolean getStatus(){
-        return status;
     }
 }

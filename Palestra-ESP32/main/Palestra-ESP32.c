@@ -375,30 +375,30 @@ int tcpConnect (){
         }
         ESP_LOGI(TAG, "CLIENT: %s\n", buffer);
         
-        if (strcmp("QUIT", buffer) == 0){
-            break;
+        if (strcmp("QUIT\n", buffer) == 0){	
+        	ESP_LOGI(TAG, "***We are waiting***\n");
+			strcpy(buffer, "WAITING\n");
+            n = write(sockFD, buffer, strlen(buffer));	
+			if (n < 0){
+    	        ESP_LOGE(TAG, "***COULD NOT WRITE TO THE CLIENT***\n");
+    	    }
         }
+		else if (strcmp("START\n", buffer) == 0){		
+        	ESP_LOGI(TAG, "***We are sending***\n");
+			i2cMasterInit(&data);
 
-		if (strcmp("START", buffer)){	
-    		i2cMasterInit(&data);
-		}
-		else{
-			printf("NOT START: %s", buffer);
-		}
-
-        //clear the buffer again
-        memset(&buffer, 0, sizeof(buffer));
+        	//clear the buffer again
+        	memset(&buffer, 0, sizeof(buffer));
 	
-		//copy the data from the i2cMasterInit to the buffer
-		strcpy(buffer, "okay\n");	
+			//copy the data from the i2cMasterInit to the buffer
+			sprintf(buffer, "%f\n", (data.accel_z - 9.81));
 
-        //send the data to the client
-       	ESP_LOGI(TAG, "***TRYING TO WRITE***\r\n");
-	   	n = write(sockFD, buffer, strlen(buffer));	
-       	ESP_LOGI(TAG, "***N: %d***\n", n);
-		if (n < 0){
-            ESP_LOGE(TAG, "***COULD NOT WRITE TO THE CLIENT***\n");
-        }
+    	    //send the data to the client
+		   	n = write(sockFD, buffer, strlen(buffer));	
+			if (n < 0){
+    	        ESP_LOGE(TAG, "***COULD NOT WRITE TO THE CLIENT***\n");
+    	    }
+		}
     }
     shutdown(sockFD, 0);
     close(sockFD);

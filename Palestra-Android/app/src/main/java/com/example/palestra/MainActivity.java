@@ -1,23 +1,16 @@
 package com.example.palestra;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import com.example.palestra.TCPClient;
-
 import com.example.palestra.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private boolean serverStatus;
     private final TCPClient tcpClient = new TCPClient();
 
     @Override
@@ -27,6 +20,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         replaceFragment(new profileFragment(this, tcpClient));
+        tcpClient.start();
+
 
         binding.navBar.setOnItemSelectedListener(item -> {
             if (item.getItemId() == (R.id.profileIcon)){
