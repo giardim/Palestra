@@ -44,5 +44,7 @@ dependencies {
     implementation("com.github.dhaval2404:imagepicker:2.1")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.jjoe64:graphview:4.2.2")
+    implementation("com.firebaseui:firebase-ui-auth:7.2.0")
+
 }
 
