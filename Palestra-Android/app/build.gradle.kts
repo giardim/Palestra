@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -45,6 +46,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.jjoe64:graphview:4.2.2")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
-
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
 }
 

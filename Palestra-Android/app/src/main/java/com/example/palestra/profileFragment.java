@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -70,7 +71,8 @@ public class profileFragment extends Fragment {
         ImageButton squatButton = rootView.findViewById(R.id.squatIcon);
         ImageButton deadliftButton = rootView.findViewById(R.id.deadliftIcon);
         ImageButton profilePicture = rootView.findViewById(R.id.profilePictureButton);
-
+        TextView usernameText = rootView.findViewById(R.id.usernameText);
+        usernameText.setText(mainActivity.getUsername());
         benchPressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
