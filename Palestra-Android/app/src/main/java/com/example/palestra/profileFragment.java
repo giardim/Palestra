@@ -72,7 +72,6 @@ public class profileFragment extends Fragment {
         ImageButton deadliftButton = rootView.findViewById(R.id.deadliftIcon);
         ImageButton profilePicture = rootView.findViewById(R.id.profilePictureButton);
         TextView usernameText = rootView.findViewById(R.id.usernameText);
-        usernameText.setText(mainActivity.getUsername());
         benchPressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
