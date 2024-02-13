@@ -76,6 +76,9 @@ struct data_t{
     float accel_x;
     float accel_y;
     float accel_z;
+	float gyro_x;
+	float gyro_y;
+	float gyro_z;
 }typedef data_t;
 
 //Reading values from the MPU6050 via I2C
@@ -146,12 +149,22 @@ void i2cMasterInit(data_t *data){
         ESP_ERROR_CHECK(i2c_master_write_byte(masterCMD, (I2C_ADDR << 1) | I2C_MASTER_READ, ACK_EN));
         
         //starting at the x accel_h it reads down to z accel_l (all accel values)
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer, ACK_DN)); 
+        
+		ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer, ACK_DN)); 
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 1, ACK_DN));
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 2, ACK_DN));
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 3, ACK_DN));
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 4, ACK_DN));
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 5, ACK_EN));
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 5, ACK_DN));
+		
+
+		//Starting at x gryro_h and reads down to z gyro_l (all gyro values)
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 8, ACK_DN)); 
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 9, ACK_DN));
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 10, ACK_DN));
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 11, ACK_DN));
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 12, ACK_DN));
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 13, ACK_EN));
 
         //stop reading the data
         ESP_ERROR_CHECK(i2c_master_stop(masterCMD));
@@ -161,24 +174,18 @@ void i2cMasterInit(data_t *data){
         //The calculations to convert the raw data to g's comes from;
         //http://ozzmaker.com/accelerometer-to-g/
         //Since we are using the +-2G tolerace, we multiply the data by .061 and divide by 100
-        data -> accel_x = (((buffer[0] << 8) | buffer[1]) * .061) / 100;
+		data -> accel_x = (((buffer[0] << 8) | buffer[1]) * .061) / 100;
         data -> accel_y = (((buffer[2] << 8) | buffer[3]) * .061) / 100;
-        data -> accel_z = (((buffer[4] << 8) | buffer[5]) * .061) / 100;
+        data -> accel_z = (((buffer[4] << 8) | buffer[5]) * .601) / 100;
+		
+		//since we are using +- 250degrees we subtract 131 
+		data -> gyro_x = ((buffer[9] << 8) | buffer[8]) / 131.0;
+        data -> gyro_y = ((buffer[10] << 8) | buffer[11]) / 131.0;
+        data -> gyro_z = ((buffer[12] << 8) | buffer[13]) / 131.0;
+	
         
-        //The calculations below are found on the arduino forms:
-        //https://forum.arduino.cc/t/converting-raw-data-from-mpu-6050-to-yaw-pitch-and-roll/465354/18
-        //calculate pitch by taking the arctan of z and x, multiply by 180 and divide by pi
-        pitch = (atan2(data->accel_z, data->accel_x) * 180) / M_PI;
+        ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data->gyro_x, data->gyro_y, data->gyro_z);
         
-        //calculate roll by taking the arctan of z and y, multiply by 180 and divide by pi
-        roll = (atan2(data->accel_z, data->accel_y) * 180) / M_PI;
-
-        //calculate yaw by taking arctan of the square root of y^2 + z^2 and x, the multiply by 180 and divide by pi
-        yaw = (atan2(sqrt(data->accel_y * data->accel_y + data->accel_z * data->accel_z), data->accel_x) * 180) / M_PI; 
-
-        ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data->accel_x, data->accel_y, data->accel_z);
-        
-        vTaskDelay(100/portTICK_PERIOD_MS);
 		return;    
 }
 
@@ -372,6 +379,7 @@ int tcpConnect (){
         n = read(sockFD, buffer, sizeof(buffer));
         if (n < 0){
             ESP_LOGE(TAG, "***COULD NOT READ FROM THE CLIENT***\n");
+			break;
         }
         ESP_LOGI(TAG, "CLIENT: %s\n", buffer);
         
@@ -381,6 +389,7 @@ int tcpConnect (){
             n = write(sockFD, buffer, strlen(buffer));	
 			if (n < 0){
     	        ESP_LOGE(TAG, "***COULD NOT WRITE TO THE CLIENT***\n");
+				break;
     	    }
         }
 		else if (strcmp("START\n", buffer) == 0){		
@@ -391,18 +400,21 @@ int tcpConnect (){
         	memset(&buffer, 0, sizeof(buffer));
 	
 			//copy the data from the i2cMasterInit to the buffer
-			sprintf(buffer, "%f\n", (data.accel_z - 9.81));
+			sprintf(buffer, "%f\n", (data.accel_x));
 
     	    //send the data to the client
 		   	n = write(sockFD, buffer, strlen(buffer));	
 			if (n < 0){
     	        ESP_LOGE(TAG, "***COULD NOT WRITE TO THE CLIENT***\n");
+				break;
     	    }
 		}
+
+        vTaskDelay(1000/portTICK_PERIOD_MS);
     }
     shutdown(sockFD, 0);
     close(sockFD);
-    exit(EXIT_SUCCESS);
+	return TCP_SUCCESS;
 }
 
 //main
@@ -424,10 +436,11 @@ void app_main(void){
         exit(EXIT_FAILURE);
     }
 
-    status = tcpConnect();
-    if (status != TCP_SUCCESS){
-        ESP_LOGI(TAG, "***IT DIDNT WORK***\n");
-    }
+	do {
+    	status = tcpConnect();
+	}
+    while (status == TCP_SUCCESS);
+       
 
     //if we don't set a delay the esp will crash
     vTaskDelay(1000 / portTICK_PERIOD_MS);
