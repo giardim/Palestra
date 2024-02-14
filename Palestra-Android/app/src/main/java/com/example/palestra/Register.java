@@ -19,6 +19,10 @@ import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class Register extends AppCompatActivity {
     private TextInputEditText username, email, password, confirmPassword;
@@ -73,6 +77,7 @@ public class Register extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         // Sign in success, update UI with the signed-in user's information
                                         Log.d(TAG, "createUserWithEmail:success");
+                                        updateDatabase(usernameStr);
                                         startActivity(MainActivity.class);
                                     } else {
                                         // If sign in fails, display a message to the user.
@@ -90,5 +95,21 @@ public class Register extends AppCompatActivity {
         Intent activityIntent = new Intent(getApplicationContext(), classname);
         startActivity(activityIntent);
         finish();
+    }
+
+    void updateDatabase(String usernameStr){
+        HashMap<String, Object> usersHashmap = new HashMap<>();
+        usersHashmap.put("username", usernameStr);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference userRef = database.getReference("users");
+
+        String key = userRef.push().getKey();
+        usersHashmap.put("key", key);
+        userRef.child(key).setValue(usersHashmap).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Toast.makeText(Register.this, "Welcome to Palestra", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

@@ -18,6 +18,8 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class workoutFragment extends Fragment {
     private String currWorkout = "";
@@ -70,6 +72,7 @@ public class workoutFragment extends Fragment {
                     trackStats.setBackgroundColor(Color.parseColor("#00ff00"));
                     workoutStats = tcpClient.getWorkoutStats();
                     updateGraph(workoutGraph);
+                    updateDatabase();
                 }
                 else{
                     isTracking = true;
@@ -108,5 +111,10 @@ public class workoutFragment extends Fragment {
             series.appendData(point, true, workoutStats.size());
         }
         workoutGraph.addSeries(series);
+    }
+
+    void updateDatabase(){
+        HashMap<String, Object> workoutStatsHashmap = new HashMap<>();
+
     }
 }
