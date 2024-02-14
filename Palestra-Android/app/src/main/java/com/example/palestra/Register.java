@@ -23,12 +23,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Objects;
+
+import com.example.palestra.Users;
 
 public class Register extends AppCompatActivity {
     private TextInputEditText username, email, password, confirmPassword;
     private Button registerButton, backToLogin;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
+    private DatabaseReference userRef;
     private final String TAG = "REGISTER ACCOUNT";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,18 +102,10 @@ public class Register extends AppCompatActivity {
     }
 
     void updateDatabase(String usernameStr){
-        HashMap<String, Object> usersHashmap = new HashMap<>();
-        usersHashmap.put("username", usernameStr);
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference userRef = database.getReference("users");
+        HashMap<String, Object> userMap = new HashMap<>();
+        userMap.put(usernameStr, usernameStr);
+        userRef = FirebaseDatabase.getInstance().getReference();
+        userRef.child("Users").child(usernameStr).setValue(userMap);
 
-        String key = userRef.push().getKey();
-        usersHashmap.put("key", key);
-        userRef.child(key).setValue(usersHashmap).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(Register.this, "Welcome to Palestra", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }

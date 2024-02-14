@@ -13,6 +13,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -20,6 +23,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import com.example.palestra.WorkoutStatsModel;
 
 public class workoutFragment extends Fragment {
     private String currWorkout = "";
@@ -27,8 +31,10 @@ public class workoutFragment extends Fragment {
     private TCPClient tcpClient;
     private volatile boolean isTracking = false;
     private ArrayList<String> workoutStats = new ArrayList<String>();
+    private WorkoutStatsModel workoutStatsModel;
 
     private TextView workout;
+    private DatabaseReference workoutRef;
 
     public workoutFragment() {
         // Required empty public constructor
@@ -72,7 +78,7 @@ public class workoutFragment extends Fragment {
                     trackStats.setBackgroundColor(Color.parseColor("#00ff00"));
                     workoutStats = tcpClient.getWorkoutStats();
                     updateGraph(workoutGraph);
-                    updateDatabase();
+                    updateDatabase(currWorkout);
                 }
                 else{
                     isTracking = true;
@@ -113,8 +119,13 @@ public class workoutFragment extends Fragment {
         workoutGraph.addSeries(series);
     }
 
-    void updateDatabase(){
-        HashMap<String, Object> workoutStatsHashmap = new HashMap<>();
-
+    void updateDatabase(String currWorkout){
+        workoutStatsModel = new WorkoutStatsModel(workoutStats);
+        workoutRef = FirebaseDatabase.getInstance().getReference();
+        workoutRef.child("WorkoutStats")
+                .child(FirebaseAuth.getInstance().getCurrentUser().toString())
+                .child(currWorkout)
+                .child(workoutStatsModel.getDate().toString())
+                .setValue(workoutStatsModel.getWorkoutMap());
     }
 }
