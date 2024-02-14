@@ -178,11 +178,12 @@ void i2cMasterInit(data_t *data){
         data -> accel_y = (((buffer[2] << 8) | buffer[3]) * .061) / 100;
         data -> accel_z = (((buffer[4] << 8) | buffer[5]) * .601) / 100;
 		
-		//since we are using +- 250degrees we subtract 131 
+		//since we are using +- 250 degrees we divide 131 
 		data -> gyro_x = ((buffer[9] << 8) | buffer[8]) / 131.0;
         data -> gyro_y = ((buffer[10] << 8) | buffer[11]) / 131.0;
         data -> gyro_z = ((buffer[12] << 8) | buffer[13]) / 131.0;
-	
+		
+		//caluate the rads to degrees
         
         ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data->gyro_x, data->gyro_y, data->gyro_z);
         

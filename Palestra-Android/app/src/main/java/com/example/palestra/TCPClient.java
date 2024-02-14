@@ -29,7 +29,6 @@ public class TCPClient extends Thread{
             this.sockFD = new Socket(HOSTNAME, PORT);
             InputStreamReader in = new InputStreamReader(sockFD.getInputStream());
             BufferedReader bf = new BufferedReader(in);
-            Log.d(TAG, "STATUS: " + status);
             while(true) {
                 if (status){
                     sendMessage("START");
@@ -41,12 +40,12 @@ public class TCPClient extends Thread{
                     sendMessage("QUIT");
                     serverMessage = getMessage(bf);
                 }
-                Log.d(TAG, "SERVER: " + serverMessage);
             }
         }
         catch(Exception e){
             Log.d(TAG, "***COULD NOT CONNECT TO HOST " + e + "***");
             this.status = false;
+            shutdownSocket();
         }
     }
 
@@ -62,6 +61,7 @@ public class TCPClient extends Thread{
         }
         catch (Exception e){
             Log.d(TAG, "***COULD NOT SEND MESSAGE TO HOST " + e +"***");
+            shutdownSocket();
         }
     }
 
@@ -69,9 +69,9 @@ public class TCPClient extends Thread{
         serverMessage = "DEFAULT";
         try {
             serverMessage = bf.readLine();
-            Log.d("GETMESSAGE", "SERVER:" + serverMessage);
         } catch (Exception e) {
             Log.d(TAG, "***COULD NOT READ MESSAGE FROM HOST " + e + "***");
+            shutdownSocket();
         }
         return serverMessage;
     }

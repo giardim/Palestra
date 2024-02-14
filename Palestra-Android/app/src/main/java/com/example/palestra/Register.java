@@ -58,6 +58,9 @@ public class Register extends AppCompatActivity {
                 if (!passwordStr.equals(confirmPasswordStr)){
                     Toast.makeText(Register.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                 }
+                else if (passwordStr.length() < 6){
+                    Toast.makeText(Register.this, "Passwords must be atleast 6 characters", Toast.LENGTH_SHORT).show();
+                }
                 else if (TextUtils.isEmpty(emailStr) || TextUtils.isEmpty(passwordStr) || TextUtils.isEmpty(usernameStr)){
                     Toast.makeText(Register.this, "Please ensure all fields are filled", Toast.LENGTH_SHORT).show();
                 }
@@ -66,6 +69,7 @@ public class Register extends AppCompatActivity {
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
+                                    progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         // Sign in success, update UI with the signed-in user's information
                                         Log.d(TAG, "createUserWithEmail:success");
@@ -76,7 +80,6 @@ public class Register extends AppCompatActivity {
                                         Toast.makeText(Register.this, "Authentication failed.",
                                                 Toast.LENGTH_SHORT).show();
                                     }
-                                    progressBar.setVisibility(View.GONE);
                                 }
                             });
                 }

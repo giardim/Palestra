@@ -98,11 +98,14 @@ public class workoutFragment extends Fragment {
 
     void updateGraph(GraphView workoutGraph){
         workoutStats = tcpClient.getWorkoutStats();
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[]{});
-
-        for (int i = 0; i < workoutStats.size(); ++i){
-            Log.d("STAT ARRAY", workoutStats.get(i));
-            series.appendData(new DataPoint(i, Double.parseDouble(workoutStats.get(i))), true, 1000);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+        workoutGraph.addSeries(series);
+        Log.d("SIZEOF WORKOUT", " " +  workoutStats.size());
+        DataPoint[] values = new DataPoint[workoutStats.size()];
+        for (int i = 0; i < workoutStats.size(); ++i) {
+            Log.d("STAT ARRAY", " " + workoutStats.get(i));
+            DataPoint point = new DataPoint(i, Double.parseDouble(workoutStats.get(i)));
+            series.appendData(point, true, workoutStats.size());
         }
         workoutGraph.addSeries(series);
     }

@@ -57,8 +57,8 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 progressBar.setVisibility(View.VISIBLE);
-                String emailStr = String.valueOf(email);
-                String passwordStr = String.valueOf(password);
+                String emailStr = email.getText().toString();
+                String passwordStr = password.getText().toString();
                 if (TextUtils.isEmpty(emailStr) || TextUtils.isEmpty(passwordStr)){
                     Toast.makeText(Login.this, "Please ensure all fields are filled out", Toast.LENGTH_SHORT).show();
                 }
@@ -66,7 +66,7 @@ public class Login extends AppCompatActivity {
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.VISIBLE);
+                                progressBar.setVisibility(View.GONE);
                                 if (task.isSuccessful()) {
                                     // Sign in success, update UI with the signed-in user's information
                                     Log.d(TAG, "signInWithEmail:success");
@@ -75,6 +75,7 @@ public class Login extends AppCompatActivity {
                                 } else {
                                     // If sign in fails, display a message to the user.
                                     Log.w(TAG, "signInWithEmail:failure", task.getException());
+
                                     Toast.makeText(Login.this, "Authentication failed.",
                                             Toast.LENGTH_SHORT).show();
                                 }
