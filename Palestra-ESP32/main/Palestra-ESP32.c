@@ -76,9 +76,6 @@ struct data_t{
     float accel_x;
     float accel_y;
     float accel_z;
-	float gyro_x;
-	float gyro_y;
-	float gyro_z;
 }typedef data_t;
 
 //Reading values from the MPU6050 via I2C
@@ -88,9 +85,6 @@ void i2cMasterInit(data_t *data){
 	static bool isInstalled = false;
 	//accocated 14 addresses for the 14 addresses in the mpu6050, not sure if we will need them all
     uint8_t buffer[14] = {0}; 
-    uint8_t pitch = 0;
-    uint8_t roll = 0;
-    uint8_t yaw = 0;
 
     //configure the master
     i2c_config_t masterCfg = {
@@ -155,17 +149,8 @@ void i2cMasterInit(data_t *data){
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 2, ACK_DN));
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 3, ACK_DN));
         ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 4, ACK_DN));
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 5, ACK_DN));
+        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 5, ACK_EN));
 		
-
-		//Starting at x gryro_h and reads down to z gyro_l (all gyro values)
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 8, ACK_DN)); 
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 9, ACK_DN));
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 10, ACK_DN));
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 11, ACK_DN));
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 12, ACK_DN));
-        ESP_ERROR_CHECK(i2c_master_read_byte(masterCMD, buffer + 13, ACK_EN));
-
         //stop reading the data
         ESP_ERROR_CHECK(i2c_master_stop(masterCMD));
         ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, masterCMD, (1000/portTICK_PERIOD_MS)));
@@ -174,10 +159,11 @@ void i2cMasterInit(data_t *data){
         //The calculations to convert the raw data to g's comes from;
         //http://ozzmaker.com/accelerometer-to-g/
         //Since we are using the +-2G tolerace, we multiply the data by .061 and divide by 100
-		data -> accel_x = (((buffer[0] << 8) | buffer[1]) * .061) / 100;
-        data -> accel_y = (((buffer[2] << 8) | buffer[3]) * .061) / 100;
-        data -> accel_z = (((buffer[4] << 8) | buffer[5]) * .601) / 100;
+		data -> accel_x = (((buffer[0] << 8) | buffer[1]) / 16383.0) * 10;
+        data -> accel_y = (((buffer[2] << 8) | buffer[3]) / 16383.0) * 10;
+        data -> accel_z = (((buffer[4] << 8) | buffer[5]) / 16383.0) * 10;
 		
+<<<<<<< HEAD
 		//since we are using +- 250 degrees we divide 131 
 		data -> gyro_x = ((buffer[9] << 8) | buffer[8]) / 131.0;
         data -> gyro_y = ((buffer[10] << 8) | buffer[11]) / 131.0;
@@ -186,6 +172,9 @@ void i2cMasterInit(data_t *data){
 		//caluate the rads to degrees
         
         ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data->gyro_x, data->gyro_y, data->gyro_z);
+=======
+        ESP_LOGI(TAG, "accel_x:\t%f accel_y:\t%f accel_z:\t%f", data->accel_x, data->accel_y, data->accel_z);
+>>>>>>> refactor_Measurement
         
 		return;    
 }
@@ -401,7 +390,7 @@ int tcpConnect (){
         	memset(&buffer, 0, sizeof(buffer));
 	
 			//copy the data from the i2cMasterInit to the buffer
-			sprintf(buffer, "%f\n", (data.accel_x));
+			sprintf(buffer, "%f\n", (data.accel_z - 9.81));
 
     	    //send the data to the client
 		   	n = write(sockFD, buffer, strlen(buffer));	
