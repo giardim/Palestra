@@ -12,7 +12,8 @@ import java.util.Locale;
 public class WorkoutStatsModel {
     private List<String> workoutStats;
     private Date date;
-    private HashMap<Integer, String> workoutMap;
+    private HashMap<String, String> workoutMap = new HashMap<>();
+    private SimpleDateFormat df;
     public WorkoutStatsModel(){
         //Do nothing
     }
@@ -21,16 +22,16 @@ public class WorkoutStatsModel {
         this.workoutStats = workoutStats;
         date = Calendar.getInstance().getTime();
         for (int i = 0; i < workoutStats.size(); ++i){
-            workoutMap.put(i, workoutStats.get(i));
+            workoutMap.put(i + "", workoutStats.get(i));
         }
-        SimpleDateFormat df = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss", Locale.getDefault());
+         this.df = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss", Locale.getDefault());
     }
 
-    public Date getDate(){
-        return date;
+    public String getDate(){
+         return df.format(date);
     }
 
-    public HashMap<Integer, String> getWorkoutMap(){
+    public HashMap<String, String> getWorkoutMap(){
         return workoutMap;
     }
 }

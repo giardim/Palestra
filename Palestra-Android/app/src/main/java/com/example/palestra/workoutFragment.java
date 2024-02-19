@@ -31,10 +31,11 @@ public class workoutFragment extends Fragment {
     private TCPClient tcpClient;
     private volatile boolean isTracking = false;
     private ArrayList<String> workoutStats = new ArrayList<String>();
-    private WorkoutStatsModel workoutStatsModel;
+    private WorkoutStatsModel workoutStatsModel = new WorkoutStatsModel();
 
     private TextView workout;
     private DatabaseReference workoutRef;
+    private FirebaseAuth mAuth;
 
     public workoutFragment() {
         // Required empty public constructor
@@ -121,11 +122,17 @@ public class workoutFragment extends Fragment {
 
     void updateDatabase(String currWorkout){
         workoutStatsModel = new WorkoutStatsModel(workoutStats);
+        String workoutString = "WorkoutStats";
+        mAuth = FirebaseAuth.getInstance();
+        String currentUser = mAuth.getCurrentUser().getDisplayName();
+        String currentDate = workoutStatsModel.getDate();
+        Log.d("CurrentUser", currentDate + " ");
         workoutRef = FirebaseDatabase.getInstance().getReference();
-        workoutRef.child("WorkoutStats")
-                .child(FirebaseAuth.getInstance().getCurrentUser().toString())
+        workoutRef.child(workoutString)
+                .child(currentUser)
                 .child(currWorkout)
-                .child(workoutStatsModel.getDate().toString())
+                .child(currentDate)
                 .setValue(workoutStatsModel.getWorkoutMap());
+
     }
 }

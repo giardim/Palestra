@@ -19,6 +19,7 @@ import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -82,6 +83,11 @@ public class Register extends AppCompatActivity {
                                         // Sign in success, update UI with the signed-in user's information
                                         Log.d(TAG, "createUserWithEmail:success");
                                         updateDatabase(usernameStr);
+                                        UserProfileChangeRequest upcr = new UserProfileChangeRequest.Builder()
+                                                .setDisplayName(usernameStr)
+                                                        .build();
+                                        FirebaseUser firebaseUser = task.getResult().getUser();
+                                        firebaseUser.updateProfile(upcr);
                                         startActivity(MainActivity.class);
                                     } else {
                                         // If sign in fails, display a message to the user.
@@ -103,7 +109,7 @@ public class Register extends AppCompatActivity {
 
     void updateDatabase(String usernameStr){
         HashMap<String, Object> userMap = new HashMap<>();
-        userMap.put(usernameStr, usernameStr);
+        userMap.put("username", usernameStr);
         userRef = FirebaseDatabase.getInstance().getReference();
         userRef.child("Users").child(usernameStr).setValue(userMap);
 
