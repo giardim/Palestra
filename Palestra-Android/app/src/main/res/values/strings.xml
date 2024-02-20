@@ -15,4 +15,6 @@
     <string name="back_to_login">Back to Login</string>
     <string name="logout">Logout</string>
     <string name="welcome_to_palestra">Welcome to Palestra</string>
+    <string name="select">Select&#8230;</string>
+    <string name="timestamp">Timestamp:</string>
 </resources>

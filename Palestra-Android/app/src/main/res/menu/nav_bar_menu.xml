@@ -8,4 +8,8 @@
         android:id="@+id/addFriendIcon"
         android:title="Add Friends"
         android:icon="@drawable/search_profile"/>
+    <item
+        android:id="@+id/checkStatsIcon"
+        android:title="Check Stats"
+        android:icon="@drawable/baseline_query_stats_24"/>
 </menu>

@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +20,6 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import com.example.palestra.WorkoutStatsModel;
 
 public class workoutFragment extends Fragment {
     private String currWorkout = "";
@@ -62,12 +58,6 @@ public class workoutFragment extends Fragment {
         workout = (TextView) root.findViewById(R.id.title);
         GraphView workoutGraph = (GraphView) root.findViewById(R.id.workoutStats);
         workout.setText(currWorkout);
-
-        //configure graph
-        workoutGraph.getViewport().setScrollable(true);
-        workoutGraph.getViewport().setScalable(true);
-        workoutGraph.getViewport().setScalableY(true);
-        workoutGraph.getViewport().setScrollableY(true);
 
         trackStats.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,6 +123,5 @@ public class workoutFragment extends Fragment {
                 .child(currWorkout)
                 .child(currentDate)
                 .setValue(workoutStatsModel.getWorkoutMap());
-
     }
 }

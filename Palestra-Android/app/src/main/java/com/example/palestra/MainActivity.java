@@ -60,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             else if (item.getItemId() == (R.id.addFriendIcon)){
                 replaceFragment(new searchFragment());
             }
+            else if (item.getItemId() == (R.id.checkStatsIcon)){
+                replaceFragment(new StatsFragment());
+            }
             return true;
         });
 
