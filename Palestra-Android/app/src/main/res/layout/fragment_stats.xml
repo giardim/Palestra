@@ -16,13 +16,23 @@
             android:id="@+id/autoCompleteText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none" />
+            android:inputType="none"/>
     </com.google.android.material.textfield.TextInputLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/workoutList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="100dp" />
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="120dp"/>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/toggleDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="75dp"
+        android:text="Delete Stat Mode"/>
 
 </FrameLayout>

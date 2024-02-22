@@ -390,7 +390,7 @@ int tcpConnect (){
     	    }
 		}
 
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+        vTaskDelay(200/portTICK_PERIOD_MS);
     }
     shutdown(sockFD, 0);
     close(sockFD);
