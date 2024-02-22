@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 replaceFragment(new searchFragment());
             }
             else if (item.getItemId() == (R.id.checkStatsIcon)){
-                replaceFragment(new StatsFragment());
+                replaceFragment(new StatsFragment(this, tcpClient));
             }
             return true;
         });

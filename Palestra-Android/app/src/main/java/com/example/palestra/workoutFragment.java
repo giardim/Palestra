@@ -22,6 +22,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.util.ArrayList;
 
 public class workoutFragment extends Fragment {
+    private final String TAG = "WORKOUT_FRAGMENT";
     private String currWorkout = "";
     private MainActivity mainActivity;
     private TCPClient tcpClient;
@@ -32,6 +33,8 @@ public class workoutFragment extends Fragment {
     private TextView workout;
     private DatabaseReference workoutRef;
     private FirebaseAuth mAuth;
+    private String currentStats;
+    private GraphView workoutGraph;
 
     public workoutFragment() {
         // Required empty public constructor
@@ -41,6 +44,15 @@ public class workoutFragment extends Fragment {
         this.currWorkout = currWorkout;
         this.mainActivity = mainActivity;
         this.tcpClient = tcpClient;
+        this.currentStats = "";
+    }
+
+    public workoutFragment(String currWorkout, MainActivity mainActivity, TCPClient tcpClient, String currentStats){
+        this.currWorkout = currWorkout;
+        this.mainActivity = mainActivity;
+        this.tcpClient = tcpClient;
+        this.currentStats = currentStats;
+        Log.d(TAG, currentStats);
     }
 
     @Override
@@ -56,8 +68,13 @@ public class workoutFragment extends Fragment {
         Button returnButton = (Button) root.findViewById(R.id.returnToMain);
         Button trackStats = (Button) root.findViewById(R.id.trackWorkout);
         workout = (TextView) root.findViewById(R.id.title);
-        GraphView workoutGraph = (GraphView) root.findViewById(R.id.workoutStats);
+        workoutGraph = (GraphView) root.findViewById(R.id.workoutStats);
         workout.setText(currWorkout);
+
+        if (currentStats != ""){
+            currentStats = currentStats.substring(1, currentStats.length() - 1);
+            updateGraph(workoutGraph, currentStats);
+        }
 
         trackStats.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,5 +140,25 @@ public class workoutFragment extends Fragment {
                 .child(currWorkout)
                 .child(currentDate)
                 .setValue(workoutStatsModel.getWorkoutMap());
+    }
+
+    void updateGraph(GraphView workoutGraph, String currentStats){
+        workoutStats.clear();
+        String[] tempStats = currentStats.split(",");
+        for (String res : tempStats){
+            workoutStats.add(res);
+            Log.d(TAG, " " + res);
+        }
+
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+        workoutGraph.addSeries(series);
+        Log.d("SIZEOF WORKOUT", " " +  workoutStats.size());
+        DataPoint[] values = new DataPoint[workoutStats.size()];
+        for (int i = 0; i < workoutStats.size(); ++i) {
+            Log.d("STAT ARRAY", " " + workoutStats.get(i));
+            DataPoint point = new DataPoint(i, Double.parseDouble(workoutStats.get(i)));
+            series.appendData(point, true, workoutStats.size());
+        }
+        workoutGraph.addSeries(series);
     }
 }

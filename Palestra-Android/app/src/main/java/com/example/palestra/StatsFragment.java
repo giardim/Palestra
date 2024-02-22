@@ -7,31 +7,25 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
+import java.security.PrivateKey;
 import java.util.ArrayList;
 
-public class StatsFragment extends Fragment {
+public class StatsFragment extends Fragment implements RecyclerViewInterface {
 
     final private String TAG = "STATS FRAGMENT";
     final private String[] workoutItems = {"Benchpress", "Squat", "Deadlift"};
@@ -41,8 +35,16 @@ public class StatsFragment extends Fragment {
     AutoCompleteTextView autoCompleteTextView;
     ArrayAdapter<String> arrayAdapter;
     private FirebaseAuth mAuth;
+    private MainActivity mainActivity;
+    private String item;
+    private TCPClient tcpClient;
     public StatsFragment() {
         // Required empty public constructor
+    }
+
+    public StatsFragment(MainActivity mainActivity, TCPClient tcpClient) {
+        this.mainActivity = mainActivity;
+        this.tcpClient = tcpClient;
     }
 
     @Override
@@ -64,9 +66,9 @@ public class StatsFragment extends Fragment {
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String item = parent.getItemAtPosition(position).toString();
+                item = parent.getItemAtPosition(position).toString();
                 getAllTimestamps(item);
-                tsRecyclerViewAdapter adapter = new tsRecyclerViewAdapter(getContext(), timestampsModels);
+                tsRecyclerViewAdapter adapter = new tsRecyclerViewAdapter(getContext(), timestampsModels, StatsFragment.this);
                 recyclerView.setAdapter(adapter);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             }
@@ -110,5 +112,11 @@ public class StatsFragment extends Fragment {
             timestampsModels.add(new allTimestampsModel(allTimeStamps.get(i), statsList.get(i)));
         }
 
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Toast.makeText(getContext(), "CLICKED " + statsList.get(position) , Toast.LENGTH_SHORT).show();
+        mainActivity.replaceFragment(new workoutFragment(item, mainActivity, tcpClient, statsList.get(position)));
     }
 }
