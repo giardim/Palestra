@@ -15,14 +15,19 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -32,6 +37,7 @@ public class StatsFragment extends Fragment {
     final private String[] workoutItems = {"Benchpress", "Squat", "Deadlift"};
     private ArrayList<allTimestampsModel> timestampsModels = new ArrayList<>();
     private ArrayList<String> allTimeStamps = new ArrayList<>();
+    private ArrayList<String> statsList = new ArrayList<>();
     AutoCompleteTextView autoCompleteTextView;
     ArrayAdapter<String> arrayAdapter;
     private FirebaseAuth mAuth;
@@ -65,6 +71,7 @@ public class StatsFragment extends Fragment {
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             }
         });
+
         return root;
     }
 
@@ -75,30 +82,33 @@ public class StatsFragment extends Fragment {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
                 .child("WorkoutStats")
                 //change this back to currentUser later
-                .child(currentUser)
+                .child("test123")
                 .child(item);
 
-
-        Log.d("HERE****", reference.toString());
-        reference.addValueEventListener(new ValueEventListener() {
+        reference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                allTimeStamps.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    allTimeStamps.add(dataSnapshot.getValue().toString());
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (task.isSuccessful() && task.getResult().exists()){
+                    allTimeStamps.clear();
+                    DataSnapshot dataSnapshot = task.getResult();
+                    for (DataSnapshot i : dataSnapshot.getChildren()){
+                        allTimeStamps.add(i.getKey());
+                        statsList.add(i.getValue().toString());
+                    }
+                    arrayAdapter.notifyDataSetChanged();
                 }
-                arrayAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+                else{
+                    Toast.makeText(getContext(), "Could not read from database", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-        Log.d("Size of allTimeStamps", "" + allTimeStamps.size());
+
+        updateModel();
+    }
+    public void updateModel(){
         for (int i = 0; i < allTimeStamps.size(); ++i){
-            Log.d("HERE***", "" + allTimeStamps.get(i));
-            timestampsModels.add(new allTimestampsModel(allTimeStamps.get(i)));
+            timestampsModels.add(new allTimestampsModel(allTimeStamps.get(i), statsList.get(i)));
         }
+
     }
 }

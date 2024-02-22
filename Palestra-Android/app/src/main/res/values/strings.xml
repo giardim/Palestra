@@ -16,5 +16,6 @@
     <string name="logout">Logout</string>
     <string name="welcome_to_palestra">Welcome to Palestra</string>
     <string name="select">Select&#8230;</string>
-    <string name="timestamp">Timestamp:</string>
+    <string name="timestamp">Timestamp: </string>
+    <string name="stat_list">Stat list:</string>
 </resources>

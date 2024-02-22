@@ -15,7 +15,7 @@ public class tsRecyclerViewAdapter extends RecyclerView.Adapter<tsRecyclerViewAd
     private Context context;
     private ArrayList<allTimestampsModel> timestampsModels;
 
-    public tsRecyclerViewAdapter(Context context, ArrayList<allTimestampsModel> timeStampModel){
+    public tsRecyclerViewAdapter (Context context, ArrayList<allTimestampsModel> timeStampModel){
         this.context = context;
         this.timestampsModels = timeStampModel;
     }
@@ -29,7 +29,8 @@ public class tsRecyclerViewAdapter extends RecyclerView.Adapter<tsRecyclerViewAd
 
     @Override
     public void onBindViewHolder(@NonNull tsRecyclerViewAdapter.MyViewHolder holder, int position) {
-        holder.timestamps.setText(timestampsModels.get(position).getTimestamp());
+        holder.timestamps.setText("Timestamp: " + timestampsModels.get(position).getTimestamp());
+        holder.statsList.setText("Stats: " + timestampsModels.get(position).getStats());
     }
 
     @Override
@@ -39,10 +40,13 @@ public class tsRecyclerViewAdapter extends RecyclerView.Adapter<tsRecyclerViewAd
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
         TextView timestamps;
+        TextView statsList;
+
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             timestamps = itemView.findViewById(R.id.timestamp);
+            statsList = itemView.findViewById(R.id.statList);
         }
     }
 }
