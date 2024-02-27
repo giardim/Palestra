@@ -43,7 +43,6 @@ public class TCPClient extends Thread{
             }
         }
         catch(Exception e){
-            Log.d(TAG, "***COULD NOT CONNECT TO HOST " + e + "***");
             this.status = false;
             shutdownSocket();
         }
@@ -60,7 +59,6 @@ public class TCPClient extends Thread{
             pr.flush();
         }
         catch (Exception e){
-            Log.d(TAG, "***COULD NOT SEND MESSAGE TO HOST " + e +"***");
             shutdownSocket();
         }
     }
@@ -70,7 +68,6 @@ public class TCPClient extends Thread{
         try {
             serverMessage = bf.readLine();
         } catch (Exception e) {
-            Log.d(TAG, "***COULD NOT READ MESSAGE FROM HOST " + e + "***");
             shutdownSocket();
         }
         return serverMessage;
@@ -85,7 +82,7 @@ public class TCPClient extends Thread{
             sockFD.close();
         }
         catch (Exception e){
-            Log.d(TAG, "***COULD NOT CLOSE SOCKET " + e + " ***");
+            //Do something
         }
 
     }

@@ -103,8 +103,7 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
         String currentUser = mAuth.getCurrentUser().getDisplayName();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
                 .child("WorkoutStats")
-                //change this back to currentUser later
-                .child("test123")
+                .child(currentUser)
                 .child(item);
 
         reference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -112,19 +111,22 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 if (task.isSuccessful() && task.getResult().exists()){
                     allTimeStamps.clear();
+                    statsList.clear();
                     DataSnapshot dataSnapshot = task.getResult();
                     for (DataSnapshot i : dataSnapshot.getChildren()){
                         allTimeStamps.add(i.getKey());
                         statsList.add(i.getValue().toString());
                     }
+                    updateModel();
                     arrayAdapter.notifyDataSetChanged();
                 }
                 else{
                     Toast.makeText(getContext(), "Could not read from database", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
-        updateModel();
+
     }
 
     public void updateModel(){
