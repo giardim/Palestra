@@ -162,23 +162,23 @@ public class profileFragment extends Fragment {
             FirebaseAuth mAuth = FirebaseAuth.getInstance();
             String currentUser = mAuth.getCurrentUser().getDisplayName();
             DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference();
-            profileReference.child("Users")
-                    .child(currentUser)
-                    .child("profilepiture");
-            profileReference.removeValue();
-            profileReference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DataSnapshot> task) {
-                    if (task.getResult() == null){
-                        //do nothing
-                    }
-                    else{
-                        setImageUri(Uri.parse(task.getResult().toString()));
-                    }
-
-                }
-            });
-        }
+//            profileReference.child("Users")
+//                    .child(currentUser)
+//                    .child("profilepiture");
+//            profileReference.removeValue();
+//            profileReference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+//                @Override
+//                public void onComplete(@NonNull Task<DataSnapshot> task) {
+//                    if (task.getResult() == null){
+//                        //do nothing
+//                    }
+//                    else{
+//                        setImageUri(Uri.parse(task.getResult().toString()));
+//                    }
+//
+//                }
+//            });
+         }
         if (getImageUri() != null){
             Glide.with(profileFragment.this).load(getImageUri()).apply(RequestOptions.circleCropTransform())
                     .into(profilePicture);

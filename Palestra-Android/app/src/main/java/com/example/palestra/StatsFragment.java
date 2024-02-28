@@ -34,6 +34,7 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
     final private String TAG = "STATS_FRAGMENT";
     final private String[] workoutItems = {"Benchpress", "Squat", "Deadlift"};
     private ArrayList<allTimestampsModel> timestampsModels = new ArrayList<>();
+    private RecyclerView recyclerView;
     private ArrayList<String> allTimeStamps = new ArrayList<>();
     private ArrayList<String> statsList = new ArrayList<>();
     private AutoCompleteTextView autoCompleteTextView;
@@ -68,7 +69,7 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
         arrayAdapter = new ArrayAdapter<String>(getContext() , R.layout.list_item, workoutItems);
         autoCompleteTextView.setAdapter(arrayAdapter);
 
-        RecyclerView recyclerView = root.findViewById(R.id.workoutList);
+        recyclerView = root.findViewById(R.id.workoutList);
         toggleDelete = root.findViewById(R.id.toggleDelete);
 
         toggleDelete.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -88,9 +89,6 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 item = parent.getItemAtPosition(position).toString();
                 getAllTimestamps(item);
-                tsRecyclerViewAdapter adapter = new tsRecyclerViewAdapter(getContext(), timestampsModels, StatsFragment.this);
-                recyclerView.setAdapter(adapter);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             }
         });
 
@@ -118,15 +116,17 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
                         statsList.add(i.getValue().toString());
                     }
                     updateModel();
+                    tsRecyclerViewAdapter adapter = new tsRecyclerViewAdapter(getContext(), timestampsModels, StatsFragment.this);
+                    recyclerView.setAdapter(adapter);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                     arrayAdapter.notifyDataSetChanged();
                 }
                 else{
                     Toast.makeText(getContext(), "Could not read from database", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
-
+        
     }
 
     public void updateModel(){
