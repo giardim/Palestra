@@ -116,10 +116,6 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
                         statsList.add(i.getValue().toString());
                     }
                     updateModel();
-                    tsRecyclerViewAdapter adapter = new tsRecyclerViewAdapter(getContext(), timestampsModels, StatsFragment.this);
-                    recyclerView.setAdapter(adapter);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                    arrayAdapter.notifyDataSetChanged();
                 }
                 else{
                     Toast.makeText(getContext(), "Could not read from database", Toast.LENGTH_SHORT).show();
@@ -133,8 +129,10 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
         for (int i = 0; i < allTimeStamps.size(); ++i){
             timestampsModels.add(new allTimestampsModel(allTimeStamps.get(i), statsList.get(i)));
         }
+        tsRecyclerViewAdapter adapter = new tsRecyclerViewAdapter(getContext(), timestampsModels, StatsFragment.this);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         arrayAdapter.notifyDataSetChanged();
-
     }
 
     @Override
@@ -145,9 +143,20 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
                     .child("test123")
                     .child(item)
                     .child(allTimeStamps.get(position));
-            reference.removeValue();
-            updateModel();
-            Toast.makeText(getContext(), "Deleted value: reload to see changes", Toast.LENGTH_SHORT).show();
+            reference.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        allTimeStamps.remove(position);
+                        updateModel();
+                        Toast.makeText(getContext(), "Deleted value: reload to see changes", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Failed to delete value", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
         } else{
             mainActivity.replaceFragment(new workoutFragment(item, mainActivity, tcpClient, statsList.get(position)));
         }

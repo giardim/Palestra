@@ -40,7 +40,7 @@ import kotlin.jvm.functions.Function1;
 
 public class profileFragment extends Fragment {
     private ActivityResultLauncher<Intent> imagePickLauncher;
-    private Uri selectedImageUri;
+    private static Uri selectedImageUri;
     private MainActivity mainActivity;
     private TCPClient tcpClient;
 
@@ -73,7 +73,7 @@ public class profileFragment extends Fragment {
         ImageButton deadliftButton = rootView.findViewById(R.id.deadliftIcon);
         ImageButton profilePicture = rootView.findViewById(R.id.profilePictureButton);
         TextView usernameText = rootView.findViewById(R.id.usernameText);
-        setProfilePicture(profilePicture, true);
+        setProfilePicture(profilePicture);
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -81,8 +81,8 @@ public class profileFragment extends Fragment {
                         if (data != null && data.getData() != null) {
                             Log.d(TAG, "" + data.getData().toString());
                             setImageUri(data.getData());
-                            setProfilePicture(profilePicture, false);
                             saveProfilePicture();
+                            setProfilePicture(profilePicture);
                         }
                     }
                 });
@@ -153,37 +153,30 @@ public class profileFragment extends Fragment {
         DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference();
         profileReference.child("Users")
                 .child(currentUser)
-                .child("profilepiture")
+                .child("profilepicture")
                 .setValue(getImageUri().toString());
     }
 
-    public void setProfilePicture(ImageButton profilePicture, boolean launch){
-        if (launch) {
-            FirebaseAuth mAuth = FirebaseAuth.getInstance();
-            String currentUser = mAuth.getCurrentUser().getDisplayName();
-            DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference();
-//            profileReference.child("Users")
-//                    .child(currentUser)
-//                    .child("profilepiture");
-//            profileReference.removeValue();
-//            profileReference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-//                @Override
-//                public void onComplete(@NonNull Task<DataSnapshot> task) {
-//                    if (task.getResult() == null){
-//                        //do nothing
-//                    }
-//                    else{
-//                        setImageUri(Uri.parse(task.getResult().toString()));
-//                    }
-//
-//                }
-//            });
-         }
-        if (getImageUri() != null){
-            Glide.with(profileFragment.this).load(getImageUri()).apply(RequestOptions.circleCropTransform())
-                    .into(profilePicture);
-        }
-
+    public void setProfilePicture(ImageButton profilePicture){
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String currentUser = mAuth.getCurrentUser().getDisplayName();
+        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser);
+        profileReference.child("profilepicture").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                Log.d("HERE TOO", task.getResult().toString());
+                try {
+                    setImageUri(Uri.parse(task.getResult().getValue().toString()));
+                    Log.d("HERE", task.getResult().getValue().toString());
+                    Glide.with(profileFragment.this).load(getImageUri()).apply(RequestOptions.circleCropTransform())
+                            .into(profilePicture);
+                }
+                catch (Exception e) {
+                    //do nothing
+                }
+            }
+        });
+        
     }
 
 }
