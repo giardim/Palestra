@@ -160,22 +160,25 @@ public class profileFragment extends Fragment {
     public void setProfilePicture(ImageButton profilePicture){
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String currentUser = mAuth.getCurrentUser().getDisplayName();
-        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser);
-        profileReference.child("profilepicture").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                Log.d("HERE TOO", task.getResult().toString());
-                try {
-                    setImageUri(Uri.parse(task.getResult().getValue().toString()));
-                    Log.d("HERE", task.getResult().getValue().toString());
-                    Glide.with(profileFragment.this).load(getImageUri()).apply(RequestOptions.circleCropTransform())
-                            .into(profilePicture);
+        try {
+            DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser);
+            profileReference.child("profilepicture").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    Log.d("HERE TOO", task.getResult().toString());
+                    try {
+                        setImageUri(Uri.parse(task.getResult().getValue().toString()));
+                        Log.d("HERE", task.getResult().getValue().toString());
+                        Glide.with(profileFragment.this).load(getImageUri()).apply(RequestOptions.circleCropTransform())
+                                .into(profilePicture);
+                    } catch (Exception e) {
+                        //do nothing
+                    }
                 }
-                catch (Exception e) {
-                    //do nothing
-                }
-            }
-        });
+            });
+        } catch (Exception e){
+            //do nothing
+        }
         
     }
 

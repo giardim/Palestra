@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class TCPClient extends Thread{
 
-    final static String HOSTNAME = "192.168.104.254";
+    final static String HOSTNAME = "192.168.63.254";
     final static int PORT = 8080;
     final static String TAG = "TCPClient";
     private Socket sockFD;

@@ -137,10 +137,11 @@ public class StatsFragment extends Fragment implements RecyclerViewInterface {
 
     @Override
     public void onItemClick(int position) {
+        String currentUser = mAuth.getCurrentUser().getDisplayName();
         if (isDeleteMode){
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
                     .child("WorkoutStats")
-                    .child("test123")
+                    .child(currentUser)
                     .child(item)
                     .child(allTimeStamps.get(position));
             reference.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
