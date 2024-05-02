@@ -420,8 +420,7 @@ void app_main(void){
     	status = tcpConnect();
 	}
     while (status == TCP_SUCCESS);
-       
-
+	
     //if we don't set a delay the esp will crash
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
