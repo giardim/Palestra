@@ -314,6 +314,7 @@ int tcpConnect (){
     sockFD = socket(AF_INET, SOCK_STREAM, 0);
     if (sockFD < 0){
         ESP_LOGE(TAG, "***COULD NOT OPEN SOCKET***\n");
+		return TCP_FAILURE;
     }
     else{
         ESP_LOGI(TAG, "***SOCKET OPENED***\n");
@@ -331,6 +332,7 @@ int tcpConnect (){
     //bind the port to the address
     if (bind(sockFD, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
         ESP_LOGE(TAG, "***COULD NOT BIND TO PORT***\n");
+		return TCP_FAILURE;
     }
     else{
         ESP_LOGI(TAG, "***PORT BINDED***\n");
@@ -345,6 +347,7 @@ int tcpConnect (){
     sockFD = accept(sockFD, (struct sockaddr *) &clientAddr, &cliLen);
     if (sockFD < 0){
         ESP_LOGE(TAG, "***COULD NOT ACCEPT THE SOCKET***\n");
+		return TCP_FAILURE;
     }
     else{
         printf("***SOCKET ACCEPTED***\n");
@@ -420,6 +423,10 @@ void app_main(void){
     	status = tcpConnect();
 	}
     while (status == TCP_SUCCESS);
+
+	if (status == TCP_FAILURE){
+		exit(EXIT_FAILURE);
+	}
 	
     //if we don't set a delay the esp will crash
     vTaskDelay(1000 / portTICK_PERIOD_MS);
